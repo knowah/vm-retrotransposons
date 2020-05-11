@@ -7,4 +7,4 @@ editor_options:
   chunk_output_type: console
 ---
 
-Describe your project.
+These are the data analyses accompanying _Genomic context of variably-methylated repetitive elements in mouse_.
