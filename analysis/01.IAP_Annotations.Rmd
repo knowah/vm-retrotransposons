@@ -16,6 +16,7 @@ params:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message=FALSE)
 knitr::opts_chunk$set(results="hide")
+knitr::opts_chunk$set(autodep = TRUE)
 
 library(GenomicRanges)
 library(dplyr)
