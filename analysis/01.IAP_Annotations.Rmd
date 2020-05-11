@@ -6,7 +6,8 @@ date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   html_document:
     toc: true
-    toc_float: true
+    toc_float: 
+      collapse: false
     code_folding: "hide"
 params:
   force_rmsk: FALSE
