@@ -94,20 +94,14 @@ mcols(mm10.IAP.gr) <- mm10.IAP[,-c(1:4)]
 There are `r nrow(mm10.IAP)` IAP (sub)element entries, representing `r length(unique(mm10.IAP$element.ID))` IAP elements. These elements are made up of `r length(unique(mm10.IAP$repName))` IAP subelement types:
 *`r paste(unique(mm10.IAP$repName), sep=", ")`*.
 
-Within an IAP, the subelements may be missing components (relative to their full-length reference), or be broken up by other retroelements that have internaled themselves within the element.
-
-An example of these annotations is below: 
-
-** add example **
-
-Note that many of the subelements which appear multiple times in the same IAP are often actually fragmented parts of a full subelement.
+Within an IAP, the subelements may be missing components (relative to their full-length reference), or be broken up by other retroelements that have internaled themselves within the element. Note that many of the subelements which appear multiple times in the same IAP are often actually fragmented parts of a full subelement.
 
 # Refining structure
 
 Initially I tried to overcome this by merging adjacent subelements which were broken up in the annotation, requiring the broken subelements to have be an exact continuation of the IAP subelement reference (i.e., the repEnd of on element corresponding to repStart of the next).
 However this was extremely slow and didn't produced the desired results.
 
-```{r obtain.element.seq, eval=FALSE}
+```{r obtain.element.seq, include=FALSE, eval=FALSE}
 # 
 library(BSgenome.Mmusculus.UCSC.mm10)
 
@@ -127,7 +121,7 @@ if (make.seq.fasta) {
 }
 ```
 
-```{r refine.IAP.structure, eval=FALSE, cache=TRUE}
+```{r refine.IAP.structure, include=FALSE, eval=FALSE, cache=TRUE}
 REFINE.MAX.GAP <- 0
 mm10.IAP.refined <- GRanges()
 REFINE.DEBUG <- FALSE
@@ -210,12 +204,12 @@ This results in `r length(unique(mm10.IAP.reduced$reduced.structure))` unique IA
 
 _NB: in the list above and plot below, element names are missing the 'IAP' prefix for brevity_
 
-# Fixing partial IAPs
+# Fixing fragmented IAPs
 
-Many IAPs are of a 'partial' structure in the annotation: i.e., `LTR || internal` or solo `internal`s or `internal || LTR`.
+Many IAPs are of a 'fragmented' structure in the annotation: i.e., `LTR || internal` or solo `internal`s or `internal || LTR`.
 However, when looking at the genome browser, it is often apparent that these are actually fully structured IAPs which have been misannotated for various reasons:
 
-![example](example_broken_IAP.PNG).
+![example](data/misc/example_broken_IAP.PNG)
 
 To fix these, I will look for at elements of the annotation of the three patterns above, and try to stitch them together. For example, if an `LTR || internal` element is followed by an `internal || LTR` element nearby (or even a solo LTR), I will combine them.
 
@@ -375,7 +369,7 @@ for (inc.elem in incomplete.elements) {
 mm10.IAP.mended <- distinct(as.data.frame(mcols(mm10.IAP.gr)[,c("orig.element.ID", "element.ID")]))
 ```
 
-This process resulted in `r with(mm10.IAP.mended, sum(orig.element.ID != element.ID))` elements being combined with other elements, and increased the number of fully-structured IAPs from `r sum(mm10.IAP.reduced.old$fully.structured)` to `r sum(mm10.IAP.reduced$fully.structured)`.
+This process resulted in `r with(mm10.IAP.mended, sum(orig.element.ID != element.ID))` elements being combined with other elements, and increased the number of fully-structured IAPs from `r sum(mm10.IAP.reduced.old$fully.structured)` to `r sum(mm10.IAP.reduced$fully.structured)`. *fix this*
 
 An example of the mended vs old (RepeatMasker) annotation is shown below.
 
