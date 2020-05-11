@@ -8,9 +8,31 @@ editor_options:
   chunk_output_type: console
 ---
 
+# Introduction
+
+This site contains the analyses related to _Genomic context of variably-methylated repetitive elements in mouse_, a manuscript by Jessica Elmer, Amir Hay, and Noah Kessler, under the supervision of Prof. Anne Ferguson-Smith.
+
+This project is an update, an improvement, and an expansion on [Kazachenka & Bertozzi _et al_. 2018](https://doi.org/10.1016/j.cell.2018.09.043).
+
 # Analyses
 
 ## IAP Annotations
 
 This analysis helped fix issues with the RepeatMasker annotations of IAPs.
 See [01.IAP_Annotations.html](01.IAP_Annotations.html).
+
+## Updated screen for VM-IAPs
+
+Analyses to be added.
+
+## Validations and tsVM-IAPs
+
+Analyses to be added.
+
+## Expansion of screen to other repeat classes
+
+Analyses to be added.
+
+## CTCF binding
+
+Analyses to be added.
