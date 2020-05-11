@@ -12,7 +12,8 @@ navbar:
 output:
   workflowr::wflow_html:
     toc: yes
-    toc_float: yes
+    toc_float:
+      collapse: false
     code_folding: "hide"
     theme: cosmo
     highlight: textmate
