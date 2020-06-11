@@ -62,6 +62,7 @@ The RepeatMasker annotation contains every type of repetitive element and has br
 #
 # data schema: https://genome-euro.ucsc.edu/cgi-bin/hgTables?hgsid=231014018_roJ2Iz2tmhdVWs4k5HUSxPurFQ2r&hgta_doSchemaDb=mm10&hgta_doSchemaTable=rmskOutCurrent
 # cached version of schema: data/misc/Schema_for_rmskOutCurrent.html
+
 import gzip
 from fix_RepeatMasker_breaks import fix_RM_breaks
 
@@ -184,7 +185,12 @@ for (elem in unique(mm10.IAP.gr$element.ID)) {
 ```{r reduce.IAP.structure}
 get.reduced.structure <- function(strand, repName) {
   paste(
-    {if (any(strand=="-")) rev(repName[start(Rle(repName))]) else repName[start(Rle(repName))]},
+    {
+      if (any(strand=="-"))
+        rev(repName[start(Rle(repName))])
+      else
+        repName[start(Rle(repName))]
+    },
     collapse="|"
   )
 }
@@ -197,12 +203,12 @@ mm10.IAP.reduced.counts <- count.df(mm10.IAP.reduced, "reduced.structure", "Geno
 
 ```
 
-A faster and more digestible solution was to simply 'collapse' adjacent subelements of the same type into a single subelement of that type (e.g., `IAPLTR1a_Mm|IAPEz-int|IAPEz-int|IAPLTR1a_Mm` becomes `IAPLTR1a_Mm|IAPEz-int|IAPLTR1a_Mm`).
+A faster and more digestible solution was to simply 'collapse' adjacent subelements of the same type into a single subelement of that type (e.g., `IAPLTR1a_Mm || IAPEz-int || IAPEz-int || IAPLTR1a_Mm` becomes `IAPLTR1a_Mm || IAPEz-int || IAPLTR1a_Mm`).
 This results in `r length(unique(mm10.IAP.reduced$reduced.structure))` unique IAP element structures, shown below with their frequency in the genome:
 
 `r knitr::kable(mm10.IAP.reduced.counts %>% mutate(Structure=gsub("IAP-?", "", gsub("\\|", " || ", reduced.structure))) %>% select(Structure, Genome) %>% arrange(desc(Genome))) %>% kable_styling() %>% scroll_box(height="240px")`
 
-_NB: in the list above and plot below, element names are missing the 'IAP' prefix for brevity_
+_NB: In the list above and plot below, element names are missing the 'IAP' prefix for brevity._
 
 # Fixing fragmented IAPs
 
@@ -248,7 +254,6 @@ mm10.IAP.reduced <- cbind(mm10.IAP.reduced, analyse.structure(mm10.IAP.reduced$b
 ```
 
 ```{r fix.partial.IAPs, cache=TRUE}
-#################
 # iterate through incomplete IAPs (!solo & !full) and try to join them with nearby elements
 PARTIAL.JOIN.GAP <- 2000 # max distance between partial elements to join them
 
@@ -262,7 +267,6 @@ combine.elements <- function(old.id, new.id) {
   # replace the element ID in the GRanges object
   mm10.IAP.gr[which(mm10.IAP.gr$element.ID == old.id)]$element.ID <<- new.id
   
-  #cat("Here 1\n")
   # reclassify the new element structure
   new.elem.idx <- which(mm10.IAP.reduced$element.ID==new.id)
   
@@ -270,18 +274,16 @@ combine.elements <- function(old.id, new.id) {
     mm10.IAP.reduced[new.elem.idx,]$strand,
     mm10.IAP.gr[mm10.IAP.gr$element.ID == new.id]$repName
   )
-  #cat("Here 2\n")
   
-  mm10.IAP.reduced[new.elem.idx,]$basic.structure <<- get.basic.structure(mm10.IAP.reduced[new.elem.idx,]$reduced.structure)
+  mm10.IAP.reduced[new.elem.idx,]$basic.structure <<- get.basic.structure(
+    mm10.IAP.reduced[new.elem.idx,]$reduced.structure
+  )
   
-  #cat("Here 3\n")
   new.analysis <- analyse.structure(mm10.IAP.reduced[new.elem.idx,]$basic.structure)
   mm10.IAP.reduced[new.elem.idx,names(new.analysis)] <<- new.analysis
     
-  #cat("Here 4\n")
   # remove old entry
   mm10.IAP.reduced <<- mm10.IAP.reduced[-which(mm10.IAP.reduced$element.ID==old.id),]
-  #cat("Here 5\n")
 }
 
 get.single_elem.gr <- function(elem.id) {
@@ -370,12 +372,12 @@ for (inc.elem in incomplete.elements) {
   }
 }
 
-mm10.IAP.mended <- distinct(as.data.frame(mcols(mm10.IAP.gr)[,c("orig.element.ID", "element.ID")]))
+mm10.IAP.mended <- distinct(
+  as.data.frame(mcols(mm10.IAP.gr)[,c("orig.element.ID", "element.ID")])
+)
 ```
 
-This process resulted in `r with(mm10.IAP.mended, sum(orig.element.ID != element.ID))` elements being combined with other elements, and increased the number of fully-structured IAPs from `r sum(mm10.IAP.reduced.old$fully.structured)` to `r sum(mm10.IAP.reduced$fully.structured)`. *fix this*
-
-An example of the mended vs old (RepeatMasker) annotation is shown below.
+This process resulted in `r with(mm10.IAP.mended, sum(orig.element.ID != element.ID))` elements being combined with other elements, and increased the number of fully-structured IAPs from `r sum(mm10.IAP.reduced.old$fully.structured)` to `r sum(mm10.IAP.reduced$fully.structured)`. An example of the mended vs old (RepeatMasker) annotation is shown below:
 
 ```{r plot.old.vs.new, fig.align='center', fig.height=3}
 plot.elem <- function(elem.id) {
