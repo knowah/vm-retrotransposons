@@ -400,7 +400,7 @@ div.tocify {
 
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
-<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
 </button>
 </p>
 <div id="workflowr-report" class="collapse">
@@ -409,7 +409,7 @@ div.tocify {
 <a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -421,7 +421,7 @@ div.tocify {
 <strong>Last updated:</strong> 2020-06-11
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>Paper_VMIAP_2020/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
@@ -485,12 +485,24 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongdetected"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>Cache:</strong> detected </a>
 </p>
 </div>
-<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div id="strongCachestrongdetected" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+The following chunks had caches available:
+<ul>
+<li>
+fix.partial.IAPs
+</li>
+<li>
+load.IAP.data
+</li>
+<li>
+refine.IAP.structure
+</li>
+</ul>
+<p>To ensure reproducibility of the results, delete the cache directory <code>01.IAP_Annotations_cache</code> and re-run the analysis. To have workflowr automatically delete the cache directory prior to building the file, set <code>delete_cache = TRUE</code> when running <code>wflow_build()</code> or <code>wflow_publish()</code>.</p>
 </div>
 </div>
 </div>
@@ -509,26 +521,28 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong5b00d8c"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 5b00d8c </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong266fbd9"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 266fbd9 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong5b00d8c" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong266fbd9" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 5b00d8c. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 266fbd9. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 </p>
 <pre><code>
+Ignored files:
+    Ignored:    analysis/01.IAP_Annotations_cache/
+
 Untracked files:
     Untracked:  01.IAP_Annotations.Rmd
     Untracked:  __pycache__/
     Untracked:  analysis/02.Screen_for_VM_IAP.Rmd
-    Untracked:  analysis/fix_RepeatMasker_breaks.py
     Untracked:  code/CTCFChIPatVM-IAPs_narrowpeak.sh
     Untracked:  code/CTCFChIPatVM-IAPs_pvalueRelax_narrowpeak.sh
     Untracked:  code/CTCF_Analysis.Rmd
@@ -591,6 +605,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+266fbd9
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-06-11
+</td>
+<td>
+small tweaks
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+6022b40
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-06-11
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -810,6 +858,7 @@ run_rmsk_fix = params$force_rmsk || !file.exists(rmsk_iap_break_fix)</code></pre
 #
 # data schema: https://genome-euro.ucsc.edu/cgi-bin/hgTables?hgsid=231014018_roJ2Iz2tmhdVWs4k5HUSxPurFQ2r&amp;hgta_doSchemaDb=mm10&amp;hgta_doSchemaTable=rmskOutCurrent
 # cached version of schema: data/misc/Schema_for_rmskOutCurrent.html
+
 import gzip
 from fix_RepeatMasker_breaks import fix_RM_breaks
 
@@ -843,7 +892,12 @@ mcols(mm10.IAP.gr) &lt;- mm10.IAP[,-c(1:4)]</code></pre>
 <p>Initially I tried to overcome this by merging adjacent subelements which were broken up in the annotation, requiring the broken subelements to have be an exact continuation of the IAP subelement reference (i.e., the repEnd of on element corresponding to repStart of the next). However this was extremely slow and didn’t produced the desired results.</p>
 <pre class="r"><code>get.reduced.structure &lt;- function(strand, repName) {
   paste(
-    {if (any(strand==&quot;-&quot;)) rev(repName[start(Rle(repName))]) else repName[start(Rle(repName))]},
+    {
+      if (any(strand==&quot;-&quot;))
+        rev(repName[start(Rle(repName))])
+      else
+        repName[start(Rle(repName))]
+    },
     collapse=&quot;|&quot;
   )
 }
@@ -853,7 +907,7 @@ mm10.IAP.reduced &lt;- mm10.IAP.gr %&gt;% as.data.frame() %&gt;%
   summarize(reduced.structure=get.reduced.structure(strand, repName))
 
 mm10.IAP.reduced.counts &lt;- count.df(mm10.IAP.reduced, &quot;reduced.structure&quot;, &quot;Genome&quot;)</code></pre>
-<p>A faster and more digestible solution was to simply ‘collapse’ adjacent subelements of the same type into a single subelement of that type (e.g., <code>IAPLTR1a_Mm|IAPEz-int|IAPEz-int|IAPLTR1a_Mm</code> becomes <code>IAPLTR1a_Mm|IAPEz-int|IAPLTR1a_Mm</code>). This results in 203 unique IAP element structures, shown below with their frequency in the genome:</p>
+<p>A faster and more digestible solution was to simply ‘collapse’ adjacent subelements of the same type into a single subelement of that type (e.g., <code>IAPLTR1a_Mm || IAPEz-int || IAPEz-int || IAPLTR1a_Mm</code> becomes <code>IAPLTR1a_Mm || IAPEz-int || IAPLTR1a_Mm</code>). This results in 203 unique IAP element structures, shown below with their frequency in the genome:</p>
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:240px; ">
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
@@ -2494,7 +2548,7 @@ RMER6C || EY3-int
 </tbody>
 </table>
 </div>
-<p><em>NB: in the list above and plot below, element names are missing the ‘IAP’ prefix for brevity</em></p>
+<p><em>NB: In the list above and plot below, element names are missing the ‘IAP’ prefix for brevity.</em></p>
 </div>
 <div id="fixing-fragmented-iaps" class="section level1">
 <h1>Fixing fragmented IAPs</h1>
@@ -2533,8 +2587,7 @@ mm10.IAP.reduced$basic.structure &lt;- sapply(
 )
 
 mm10.IAP.reduced &lt;- cbind(mm10.IAP.reduced, analyse.structure(mm10.IAP.reduced$basic.structure))</code></pre>
-<pre class="r"><code>#################
-# iterate through incomplete IAPs (!solo &amp; !full) and try to join them with nearby elements
+<pre class="r"><code># iterate through incomplete IAPs (!solo &amp; !full) and try to join them with nearby elements
 PARTIAL.JOIN.GAP &lt;- 2000 # max distance between partial elements to join them
 
 incomplete.elements &lt;- with(mm10.IAP.reduced, element.ID[!solo.LTR &amp; !fully.structured])
@@ -2547,7 +2600,6 @@ combine.elements &lt;- function(old.id, new.id) {
   # replace the element ID in the GRanges object
   mm10.IAP.gr[which(mm10.IAP.gr$element.ID == old.id)]$element.ID &lt;&lt;- new.id
   
-  #cat(&quot;Here 1\n&quot;)
   # reclassify the new element structure
   new.elem.idx &lt;- which(mm10.IAP.reduced$element.ID==new.id)
   
@@ -2555,18 +2607,16 @@ combine.elements &lt;- function(old.id, new.id) {
     mm10.IAP.reduced[new.elem.idx,]$strand,
     mm10.IAP.gr[mm10.IAP.gr$element.ID == new.id]$repName
   )
-  #cat(&quot;Here 2\n&quot;)
   
-  mm10.IAP.reduced[new.elem.idx,]$basic.structure &lt;&lt;- get.basic.structure(mm10.IAP.reduced[new.elem.idx,]$reduced.structure)
+  mm10.IAP.reduced[new.elem.idx,]$basic.structure &lt;&lt;- get.basic.structure(
+    mm10.IAP.reduced[new.elem.idx,]$reduced.structure
+  )
   
-  #cat(&quot;Here 3\n&quot;)
   new.analysis &lt;- analyse.structure(mm10.IAP.reduced[new.elem.idx,]$basic.structure)
   mm10.IAP.reduced[new.elem.idx,names(new.analysis)] &lt;&lt;- new.analysis
     
-  #cat(&quot;Here 4\n&quot;)
   # remove old entry
   mm10.IAP.reduced &lt;&lt;- mm10.IAP.reduced[-which(mm10.IAP.reduced$element.ID==old.id),]
-  #cat(&quot;Here 5\n&quot;)
 }
 
 get.single_elem.gr &lt;- function(elem.id) {
@@ -2655,9 +2705,10 @@ for (inc.elem in incomplete.elements) {
   }
 }
 
-mm10.IAP.mended &lt;- distinct(as.data.frame(mcols(mm10.IAP.gr)[,c(&quot;orig.element.ID&quot;, &quot;element.ID&quot;)]))</code></pre>
-<p>This process resulted in 2387 elements being combined with other elements, and increased the number of fully-structured IAPs from 2740 to 3858. <em>fix this</em></p>
-<p>An example of the mended vs old (RepeatMasker) annotation is shown below.</p>
+mm10.IAP.mended &lt;- distinct(
+  as.data.frame(mcols(mm10.IAP.gr)[,c(&quot;orig.element.ID&quot;, &quot;element.ID&quot;)])
+)</code></pre>
+<p>This process resulted in 2387 elements being combined with other elements, and increased the number of fully-structured IAPs from 2740 to 3858. An example of the mended vs old (RepeatMasker) annotation is shown below:</p>
 <pre class="r"><code>plot.elem &lt;- function(elem.id) {
   elem.df &lt;- mm10.IAP.gr[mm10.IAP.gr$element.ID %in% elem.id | mm10.IAP.gr$orig.element.ID %in% elem.id] %&gt;% as.data.frame()
   elem.df$IAP.type &lt;- sapply(as.character(elem.df$repName), function(x) c(&quot;LTR&quot;, &quot;internal&quot;)[
