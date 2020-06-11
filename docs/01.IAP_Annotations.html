@@ -11,7 +11,7 @@
 
 <meta name="author" content="Noah Kessler" />
 
-<meta name="date" content="2020-05-12" />
+<meta name="date" content="2020-06-11" />
 
 <title>Structure of murine IAP elements</title>
 
@@ -393,7 +393,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Structure of murine IAP elements</h1>
 <h4 class="author">Noah Kessler</h4>
-<h4 class="date">2020-05-12</h4>
+<h4 class="date">2020-06-11</h4>
 
 </div>
 
@@ -418,7 +418,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-05-12
+<strong>Last updated:</strong> 2020-06-11
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
@@ -521,16 +521,16 @@ refine.IAP.structure
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong47ffee2"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 47ffee2 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongb5e4f02"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> b5e4f02 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong47ffee2" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongb5e4f02" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 47ffee2. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version b5e4f02. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -540,13 +540,34 @@ Ignored files:
     Ignored:    analysis/01.IAP_Annotations_cache/
 
 Untracked files:
+    Untracked:  01.IAP_Annotations.Rmd
     Untracked:  __pycache__/
     Untracked:  analysis/02.Screen_for_VM_IAP.Rmd
     Untracked:  analysis/fix_RepeatMasker_breaks.py
+    Untracked:  code/CTCFChIPatVM-IAPs_narrowpeak.sh
+    Untracked:  code/CTCFChIPatVM-IAPs_pvalueRelax_narrowpeak.sh
+    Untracked:  code/CTCF_Analysis.Rmd
+    Untracked:  code/CTCF_motif_in_IAP.Rmd
+    Untracked:  code/CpGdensity_VM-IAPs.R
+    Untracked:  code/combine_8Indiv_CTCFChIP.r
+    Untracked:  code/combine_8Indiv_CTCFChIP_pvalueRelax.r
+    Untracked:  code/demultiplex4C_5indiv.sh
+    Untracked:  code/heatmaps_NJK.R
+    Untracked:  code/map.commands_cp.sh
+    Untracked:  code/mergeBam
+    Untracked:  code/normalize_log2.sh
+    Untracked:  code/normalize_log2_IAP_consensus.sh
+    Untracked:  code/normalize_log2_mergedBams.sh
+    Untracked:  code/plot_chip_in_iap.R
+    Untracked:  code/run_fimo_top10percent.sh
+    Untracked:  code/run_meme_top_10_percent.sh
     Untracked:  data/R_objects/
-    Untracked:  data/misc/
+    Untracked:  data/misc/Schema_for_rmskOutCurrent.html
     Untracked:  data/repeat_annotations/
     Untracked:  utils/
+
+Unstaged changes:
+    Deleted:    data/misc/example_broken_IAP.PNG
 
 </code></pre>
 <p>
@@ -585,6 +606,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+f08eee0
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-06-11
+</td>
+<td>
+wflow_git_commit(“analysis/01.IAP_Annotations.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+10feacb
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-05-12
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -768,7 +823,7 @@ with gzip.open(r.rmsk_full, &#39;rt&#39;) as rmskf:
 with gzip.open(r.rmsk_full, &#39;rt&#39;) as rmskf, gzip.open(r.rmsk_iap_orig, &#39;wt&#39;) as iapf:
   for line in rmskf:
     if int(line.rstrip(&#39;\n&#39;).split(&#39;\t&#39;)[16]) in IAP_ids:
-      _ = iapf.write(line)
+      _ = iapf.write(line) # capture return value to avoid printing to stdout
 
 # fix 500kb breaks in annotations
 fix_RM_breaks(r.rmsk_iap_orig, seq_gap=r.break_fix_seq_gap, rep_gap=r.break_fix_rep_gap, outfile=r.rmsk_iap_break_fix)</code></pre>
@@ -777,8 +832,8 @@ mm10.IAP &lt;- read.table(rmsk_iap_break_fix)
 colnames(mm10.IAP) &lt;- c(&quot;chrom&quot;, &quot;start&quot;, &quot;end&quot;, &quot;strand&quot;, &quot;repName&quot;, &quot;repClass&quot;, &quot;repFamily&quot;, &quot;repStart&quot;, &quot;repEnd&quot;, &quot;element.ID&quot;)
 mm10.IAP.gr &lt;- with(mm10.IAP, GRanges(chrom, IRanges(start, end), strand=strand))
 mcols(mm10.IAP.gr) &lt;- mm10.IAP[,-c(1:4)]</code></pre>
-<p>There are 30567 IAP (sub)element entries, representing 13065 IAP elements. These elements are made up of 49 IAP subelement types: <em>IAPLTR1a_Mm, IAPEY2_LTR, IAPEy-int, IAPEY3_LTR, IAPLTR2b, IAPLTR2_Mm, IAPEz-int, IAPEY4_I-int, IAP-d-int, IAPEY3-int, RLTR10B2, IAP1-MM_I-int, IAP1-MM_LTR, IAPLTR2a2_Mm, IAPLTR4, IAPLTR1_Mm, IAPEY3C_LTR, IAPLTR4_I, IAPLTR3, IAPLTR3-int, RLTR10-int, RLTR10F, IAPLTR2a, IAPEY5_LTR, IAPEY5_I-int, RLTR10D, IAPEY_LTR, RMER6C, MMERVK10C-int, IAPEY4_LTR, RLTR10A, RLTR10C, RLTR46A, ETnERV3-int, ETnERV-int, RLTR10, IAPA_MM-int, RLTR10E, RLTR46A2, ERVB4_3-LTR_MM, RLTR27, RLTR46B, RLTR10B, RLTR46, RLTR10D2, RLTR9A3, LTR10_RN, RMER17C, RMER16-int</em>.</p>
-<p>Within an IAP, the subelements may be missing components (relative to their full-length reference), or be broken up by other retroelements that have internaled themselves within the element. Note that many of the subelements which appear multiple times in the same IAP are often actually fragmented parts of a full subelement.</p>
+<p>After these steps, there are 30567 IAP (sub)element entries, representing 13065 IAP elements. These elements are made up of 49 IAP subelement types: <em>IAPLTR1a_Mm, IAPEY2_LTR, IAPEy-int, IAPEY3_LTR, IAPLTR2b, IAPLTR2_Mm, IAPEz-int, IAPEY4_I-int, IAP-d-int, IAPEY3-int, RLTR10B2, IAP1-MM_I-int, IAP1-MM_LTR, IAPLTR2a2_Mm, IAPLTR4, IAPLTR1_Mm, IAPEY3C_LTR, IAPLTR4_I, IAPLTR3, IAPLTR3-int, RLTR10-int, RLTR10F, IAPLTR2a, IAPEY5_LTR, IAPEY5_I-int, RLTR10D, IAPEY_LTR, RMER6C, MMERVK10C-int, IAPEY4_LTR, RLTR10A, RLTR10C, RLTR46A, ETnERV3-int, ETnERV-int, RLTR10, IAPA_MM-int, RLTR10E, RLTR46A2, ERVB4_3-LTR_MM, RLTR27, RLTR46B, RLTR10B, RLTR46, RLTR10D2, RLTR9A3, LTR10_RN, RMER17C, RMER16-int</em>.</p>
+<p>Within an IAP, the subelements may be missing components (relative to their full-length reference), or be broken up by other retroelements that have inserted themselves within the element. Note that many of the subelements which appear multiple times in the same IAP are often actually fragmented parts of a full subelement.</p>
 </div>
 </div>
 <div id="refining-structure" class="section level1">
@@ -2442,10 +2497,12 @@ RMER6C || EY3-int
 <div id="fixing-fragmented-iaps" class="section level1">
 <h1>Fixing fragmented IAPs</h1>
 <p>Many IAPs are of a ‘fragmented’ structure in the annotation: i.e., <code>LTR || internal</code> or solo <code>internal</code>s or <code>internal || LTR</code>. However, when looking at the genome browser, it is often apparent that these are actually fully structured IAPs which have been misannotated for various reasons:</p>
+<center>
 <div class="figure">
-<img src="data/misc/example_broken_IAP.PNG" alt="example" />
-<p class="caption">example</p>
+<img src="assets/example_broken_IAP.PNG" alt="An IAP containing a small simple repeat which has been split into four annotations of two different IAP types (d and EY5)" />
+<p class="caption">An IAP containing a small simple repeat which has been split into four annotations of two different IAP types (<em>d</em> and <em>EY5</em>)</p>
 </div>
+</center>
 <p>To fix these, I will look for at elements of the annotation of the three patterns above, and try to stitch them together. For example, if an <code>LTR || internal</code> element is followed by an <code>internal || LTR</code> element nearby (or even a solo LTR), I will combine them.</p>
 <pre class="r"><code>get.basic.structure &lt;- function(reduced.s) {
   paste(
@@ -2866,13 +2923,6 @@ ggplot(mm10.IAP.bas.cnt.plt.df, aes(x=basic.structure)) +
   scale_y_continuous(expand=c(0, 0.01)) +
   scale_fill_discrete(guide=guide_legend(reverse=TRUE, title=NULL)) +
   ggtitle(&quot;Distribution of IAP element structure&quot;)</code></pre>
-<p>A few patterns stand out:</p>
-<ul>
-<li><del>Genome-wide, many elements are just internal portions (have they lost all transpostion ability without flanking LTRs?)</del> Internal-only IAP elements have been largely eliminated by merging them with surrounding LTRs.</li>
-<li>Genome-wide, there are also many solo LTRs (especially of the <code>IAPEY2_LTR</code> and <code>IAPLTR2a2_Mm</code> type)</li>
-<li>MEs are mostly either fully-structured (of type <code>LTR1 || Z-internal || LTR1</code>), or solo LTRs of type <code>IAPLTR2_Mm</code></li>
-<li>False positives are enriched for relatively ‘rare’ structures, including solo, fully-structured, and partially-structured <code>IAPEY4</code> elements (although the N is very low for these, perhaps this says something at the <code>EY4</code> type elements and their susceptibility to poor mapping?</li>
-</ul>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
