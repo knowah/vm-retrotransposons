@@ -77,7 +77,7 @@ with gzip.open(r.rmsk_full, 'rt') as rmskf:
 with gzip.open(r.rmsk_full, 'rt') as rmskf, gzip.open(r.rmsk_iap_orig, 'wt') as iapf:
   for line in rmskf:
     if int(line.rstrip('\n').split('\t')[16]) in IAP_ids:
-      _ = iapf.write(line)
+      _ = iapf.write(line) # capture return value to avoid printing to stdout
 
 # fix 500kb breaks in annotations
 fix_RM_breaks(r.rmsk_iap_orig, seq_gap=r.break_fix_seq_gap, rep_gap=r.break_fix_rep_gap, outfile=r.rmsk_iap_break_fix)
@@ -91,10 +91,10 @@ mm10.IAP.gr <- with(mm10.IAP, GRanges(chrom, IRanges(start, end), strand=strand)
 mcols(mm10.IAP.gr) <- mm10.IAP[,-c(1:4)]
 ```
 
-There are `r nrow(mm10.IAP)` IAP (sub)element entries, representing `r length(unique(mm10.IAP$element.ID))` IAP elements. These elements are made up of `r length(unique(mm10.IAP$repName))` IAP subelement types:
+After these steps, there are `r nrow(mm10.IAP)` IAP (sub)element entries, representing `r length(unique(mm10.IAP$element.ID))` IAP elements. These elements are made up of `r length(unique(mm10.IAP$repName))` IAP subelement types:
 *`r paste(unique(mm10.IAP$repName), sep=", ")`*.
 
-Within an IAP, the subelements may be missing components (relative to their full-length reference), or be broken up by other retroelements that have internaled themselves within the element. Note that many of the subelements which appear multiple times in the same IAP are often actually fragmented parts of a full subelement.
+Within an IAP, the subelements may be missing components (relative to their full-length reference), or be broken up by other retroelements that have inserted themselves within the element. Note that many of the subelements which appear multiple times in the same IAP are often actually fragmented parts of a full subelement.
 
 # Refining structure
 
@@ -102,7 +102,7 @@ Initially I tried to overcome this by merging adjacent subelements which were br
 However this was extremely slow and didn't produced the desired results.
 
 ```{r obtain.element.seq, include=FALSE, eval=FALSE}
-# 
+
 library(BSgenome.Mmusculus.UCSC.mm10)
 
 mm10.IAP.unique.tbl <- mm10.IAP %>% group_by(element.ID) %>% 
@@ -209,7 +209,11 @@ _NB: in the list above and plot below, element names are missing the 'IAP' prefi
 Many IAPs are of a 'fragmented' structure in the annotation: i.e., `LTR || internal` or solo `internal`s or `internal || LTR`.
 However, when looking at the genome browser, it is often apparent that these are actually fully structured IAPs which have been misannotated for various reasons:
 
-![example](data/misc/example_broken_IAP.PNG)
+<center>
+
+![An IAP containing a small simple repeat which has been split into four annotations of two different IAP types (*d* and *EY5*)](assets/example_broken_IAP.PNG)
+
+</center>
 
 To fix these, I will look for at elements of the annotation of the three patterns above, and try to stitch them together. For example, if an `LTR || internal` element is followed by an `internal || LTR` element nearby (or even a solo LTR), I will combine them.
 
@@ -612,10 +616,3 @@ ggplot(mm10.IAP.bas.cnt.plt.df, aes(x=basic.structure)) +
   ggtitle("Distribution of IAP element structure")
 ```
 
-A few patterns stand out:
-
-* ~~Genome-wide, many elements are just internal portions (have they lost all transpostion ability without flanking LTRs?)~~ Internal-only IAP elements have been largely eliminated by merging them with surrounding LTRs.
-* Genome-wide, there are also many solo LTRs (especially of the `IAPEY2_LTR` and `IAPLTR2a2_Mm` type)
-* MEs are mostly either fully-structured (of type `LTR1 || Z-internal || LTR1`), or solo LTRs of type `IAPLTR2_Mm`
-* False positives are enriched for relatively 'rare' structures, including solo, fully-structured, and partially-structured `IAPEY4` elements (although the N is very low for these, perhaps this says something at the `EY4` type elements and their susceptibility to poor mapping?
- 
