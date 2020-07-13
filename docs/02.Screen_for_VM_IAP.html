@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Noah Kessler" />
+
+<meta name="date" content="2020-07-13" />
+
+<title>Screen for VM-IAPs</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Genomic Context of Variably-Methylated Repeats</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Screen for VM-IAPs</h1>
+<h4 class="author">Noah Kessler</h4>
+<h4 class="date">2020-07-13</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-07-13
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>Paper_VMIAP_2020/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20200511code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20200511)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20200511code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20200511)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongdetected"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>Cache:</strong> detected </a>
+</p>
+</div>
+<div id="strongCachestrongdetected" class="panel-collapse collapse">
+<div class="panel-body">
+The following chunks had caches available:
+<ul>
+<li>
+load.IAP.reference
+</li>
+</ul>
+<p>To ensure reproducibility of the results, delete the cache directory <code>02.Screen_for_VM_IAP_cache</code> and re-run the analysis. To have workflowr automatically delete the cache directory prior to building the file, set <code>delete_cache = TRUE</code> when running <code>wflow_build()</code> or <code>wflow_publish()</code>.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong3711a57"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 3711a57 </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrong3711a57" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version 3711a57. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/01.IAP_Annotations_cache/
+    Ignored:    analysis/02.Screen_for_VM_IAP_cache/
+
+Untracked files:
+    Untracked:  01.IAP_Annotations.Rmd
+    Untracked:  __pycache__/
+    Untracked:  code/CTCFChIPatVM-IAPs_narrowpeak.sh
+    Untracked:  code/CTCFChIPatVM-IAPs_pvalueRelax_narrowpeak.sh
+    Untracked:  code/CTCF_Analysis.Rmd
+    Untracked:  code/CTCF_motif_in_IAP.Rmd
+    Untracked:  code/CpGdensity_VM-IAPs.R
+    Untracked:  code/combine_8Indiv_CTCFChIP.r
+    Untracked:  code/combine_8Indiv_CTCFChIP_pvalueRelax.r
+    Untracked:  code/data_functions.R
+    Untracked:  code/demultiplex4C_5indiv.sh
+    Untracked:  code/genomics_functions.R
+    Untracked:  code/heatmaps_NJK.R
+    Untracked:  code/map.commands_cp.sh
+    Untracked:  code/mergeBam
+    Untracked:  code/normalize_log2.sh
+    Untracked:  code/normalize_log2_IAP_consensus.sh
+    Untracked:  code/normalize_log2_mergedBams.sh
+    Untracked:  code/plot_chip_in_iap.R
+    Untracked:  code/run_fimo_top10percent.sh
+    Untracked:  code/run_meme_top_10_percent.sh
+    Untracked:  data/R_objects/
+    Untracked:  data/misc/Schema_for_rmskOutCurrent.html
+    Untracked:  data/repeat_annotations/
+    Untracked:  data/validation/
+    Untracked:  unsorted.Rmd
+
+Unstaged changes:
+    Modified:   README.md
+    Modified:   analysis/01.IAP_Annotations.Rmd
+    Modified:   analysis/index.Rmd
+    Deleted:    data/misc/example_broken_IAP.PNG
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/02.Screen_for_VM_IAP.Rmd</code>) and HTML (<code>docs/02.Screen_for_VM_IAP.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+3711a57
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-07-13
+</td>
+<td>
+wflow_publish(“analysis/02.Screen_for_VM_IAP.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>library(dplyr)
+library(tidyr)
+library(readr)
+library(reshape2)
+library(GenomicRanges)
+library(ggplot2)
+
+knitr::opts_chunk$set(message = FALSE) 
+
+source(&quot;code/genomics_functions.R&quot;)
+source(&quot;code/data_functions.R&quot;)</code></pre>
+<pre class="r"><code>CpGs.in.region &lt;- function(CpG.gr, region.gr, N.CpG=0, from.right=FALSE) {
+  ovlps &lt;- as.data.frame(findOverlaps(CpG.gr, region.gr))
+  ovlps$CG.pos &lt;- start(CpG.gr[ovlps$queryHits])
+  if (from.right) {
+    ovlps &lt;- ovlps %&gt;% arrange(subjectHits, desc(CG.pos))
+  }
+  
+  selected.CGs &lt;- ovlps %&gt;%
+    group_by(subjectHits) %&gt;%
+    mutate(CG.index=1:n())
+  if (N.CpG &gt; 0) {
+    selected.CGs &lt;- selected.CGs %&gt;% top_n(-N.CpG, CG.index)
+  }
+  selected.CGs &lt;- selected.CGs %&gt;%
+    dplyr::select(-queryHits) %&gt;%
+    as.data.frame()
+  
+  colnames(selected.CGs) &lt;- c(&quot;index&quot;, &quot;CG.pos&quot;, &quot;CG.index&quot;)
+  selected.CGs$side &lt;- if (from.right) &quot;right&quot; else &quot;left&quot;
+  selected.CGs
+}
+
+get.files.and.names &lt;- function(dir, pattern) {
+  files &lt;- file.path(dir, list.files(dir, pattern))
+  names &lt;- as.character(
+    sapply(files, function(n) 
+      paste(strsplit(basename(n),&quot;\\.&quot;)[[1]][1:2], collapse=&quot;_&quot;)
+  ))
+  list(names = names, files = files)
+}
+
+LTR.CpG.methy &lt;- function(LTR.CG.df, files, sample.names, shift=0, just.counts=FALSE) {
+  stopifnot(length(sample.names) == length(files))
+  
+  for (f.idx in 1:length(files)) {
+    cat(sample.names[f.idx],&quot;\n&quot;)
+     
+    sample.data &lt;- read.table(files[f.idx], header=FALSE)
+    if (just.counts) {
+      colnames(sample.data) &lt;- c(&quot;chrom&quot;, &quot;CG.pos&quot;, 
+        paste0(sample.names[f.idx], &quot;.umC&quot;),   paste0(sample.names[f.idx], &quot;.mC&quot;))
+    } else {
+      colnames(sample.data) &lt;- c(&quot;chrom&quot;, &quot;CG.pos&quot;, 
+        paste0(sample.names[f.idx], &quot;.umC&quot;),   paste0(sample.names[f.idx], &quot;.mC&quot;),
+        paste0(sample.names[f.idx], &quot;.depth&quot;), paste0(sample.names[f.idx], &quot;.methy&quot;))
+    }
+    sample.data$chrom &lt;- factor(sample.data$chrom, levels=levels(LTR.CG.df$chrom))
+    sample.data$CG.pos &lt;- sample.data$CG.pos + shift #shift to 1-indexed pos
+    
+    LTR.CG.df &lt;- left_join(LTR.CG.df, sample.data, by=c(&quot;chrom&quot;, &quot;CG.pos&quot;))
+  }
+  
+  LTR.CG.df
+}
+
+element.mean &lt;- function(CG.methy, min.N.CG=0) {
+  CG.methy %&gt;%
+    dplyr::select(element.ID, side, CG.index, ends_with(&quot;.umC&quot;), ends_with(&quot;.mC&quot;)) %&gt;%
+    gather(&quot;samp_state&quot;, &quot;count&quot;, ends_with(&quot;mC&quot;)) %&gt;%
+    separate(samp_state, c(&quot;sample&quot;, &quot;m.state&quot;), &quot;\\.&quot;) %&gt;%
+    spread(m.state, count) %&gt;%
+    filter(!is.na(mC) &amp; !is.na(umC)) %&gt;%
+    group_by(element.ID, side, sample) %&gt;%
+    filter(n() &gt;= min.N.CG) %&gt;%
+    summarize(total.count = sum(mC+umC), methy=sum(mC) / total.count)
+}
+
+calculate.ranges &lt;- function(means, min.count, min.samps, prefix=NULL) {
+  means %&gt;%
+    filter(total.count &gt;= min.count) %&gt;%
+    group_by(element.ID, side) %&gt;%
+    filter(n() &gt;= min.samps) %&gt;%
+    arrange(desc(methy)) %&gt;%
+    summarize(range1=first(methy)-last(methy),
+              range2=nth(methy, 2)-nth(methy,n()-1)) %&gt;%
+    { if (!is.null(prefix))
+        rename_at(., vars(-c(&quot;element.ID&quot;, &quot;side&quot;)), ~ paste0(prefix, .))
+      else .
+    }
+}
+
+plot.ranges &lt;- function(rng.gr, x.col, y.col, side=NULL, ME.only = FALSE) {
+  if (!is.null(side)) rng.gr &lt;- rng.gr[rng.gr$side == side]
+  if (!ME.only) {
+    plt &lt;- ggplot(rng.gr, aes_string(x=x.col, y=y.col)) +
+    geom_point(alpha=0.3) 
+  } else {
+    plt &lt;- ggplot(rng.gr, mapping = aes_string(x=x.col, y=y.col))
+  }
+  plt &lt;- plt + 
+    geom_point(data=rng.gr %&gt;% filter(!is.na(ME)), aes(fill=ME), shape=21) +
+    geom_hline(yintercept=0.1, color=&quot;blue&quot;, alpha=0.5) +
+    geom_vline(xintercept=0.1, color=&quot;blue&quot;, alpha=0.5) +
+    theme_bw()
+  
+  plt
+}</code></pre>
+<div id="location-of-cpgs-in-iap-ltrs" class="section level1">
+<h1>Location of CpGs in IAP LTRs</h1>
+<p>With an improved annotation of IAPs, the next step is to get a more robust set of DNA methylation levels at the CpGs within IAP LTRs from the Blueprint data. Because IAPs are of varying length and because their repetitive nature prevents Illumina reads from mapping unambiguously on the inside of the elements, only the outer-most CpGs on either edge of each IAP are considered.</p>
+<pre class="r"><code>N.CPG &lt;- 8
+
+mm10.IAP.gr &lt;- readRDS(&quot;data/R_objects/mm10.IAP.gr.RDS&quot;)
+
+# look at &#39;left&#39;-most CpGs from the 5&#39; end of + strand LTRs
+# and from the 3&#39; end of - strand LTRs
+mm10.IAP.LTR.look_left &lt;- mm10.IAP.gr[with(mm10.IAP.gr,
+  is.LTR &amp; ((first.subelement &amp; strand == &quot;+&quot;) | (last.subelement &amp; strand == &quot;-&quot;))
+)]
+
+# look at &#39;right&#39;-most CpGs from the 3&#39; end of + strand LTRs
+# and from the 5&#39; end of - strand LTRs
+mm10.IAP.LTR.look_right &lt;- mm10.IAP.gr[with(mm10.IAP.gr,
+  is.LTR &amp; ((first.subelement &amp; strand == &quot;-&quot;) | (last.subelement &amp; strand == &quot;+&quot;))
+)]
+
+# load mm10 CpG locations
+mm10.CpG.gr &lt;- sortSeqlevels(readRDS(&quot;data/R_objects/mm10.CpG.gr.RDS&quot;))
+mm10.CpG.gr &lt;- sort(mm10.CpG.gr) # should be sorted, but force anyway since it&#39;s needed
+
+# define relevant CpGs
+mm10.IAP.LTR.CpGs &lt;- rbind(
+  index.r_join(
+    mm10.IAP.LTR.look_left, 
+    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.look_left, N.CPG, FALSE)
+  ),
+  index.r_join(
+    mm10.IAP.LTR.look_right,
+    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.look_right, N.CPG, TRUE)
+  )
+) %&gt;%
+  arrange(element.ID, side, CG.index) %&gt;%
+  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
+
+colnames(mm10.IAP.LTR.CpGs)[1] &lt;- &quot;chrom&quot;
+
+mm10.IAP.df &lt;- mm10.IAP.gr %&gt;%
+  as.data.frame() %&gt;%
+  group_by(element.ID, seqnames, strand) %&gt;%
+  summarize(start=min(start), end=max(end))
+
+#mm10.IAP.LTR.adj.CpGs &lt;- rbind(
+#  index.r_join(mm10.IAP.LTR.look_left, CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_right, 0, TRUE)),
+#  index.r_join(mm10.IAP.LTR.look_right, CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_left, 0, FALSE))
+#) %&gt;%
+#  arrange(element.ID, side, CG.index) %&gt;%
+#  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
+#
+#mm10.IAP.LTR.adj.CpGs &lt;- rbind(
+#  index.r_join(
+#    mm10.IAP.LTR.look_left,
+#    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_right, 0, TRUE)
+#  ),
+#  index.r_join(
+#    mm10.IAP.LTR.look_right,
+#    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_left, 0, FALSE)
+#  )
+#) %&gt;%
+#  arrange(element.ID, side, CG.index) %&gt;%
+#  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
+#colnames(mm10.IAP.LTR.adj.CpGs)[1] &lt;- &quot;chrom&quot;</code></pre>
+<div class="alert alert-warning">
+<p>
+<strong>Warning:</strong> The above code chunk cached its results, but it won’t be re-run if previous chunks it depends on are updated. If you need to use caching, it is highly recommended to also set <code>knitr::opts_chunk$set(autodep = TRUE)</code> at the top of the file (in a chunk that is not cached). Alternatively, you can customize the option <code>dependson</code> for each individual chunk that is cached. Using either <code>autodep</code> or <code>dependson</code> will remove this warning. See the <a href="https://yihui.name/knitr/options/#cache"
+>knitr cache options</a> for more details.
+</p>
+</div>
+<p>The number of CpGs selected for these analyses is 8. How far do 8 CpGs tend to reach inside of the repeat? If the 8th CpG is too far inside of the repeat, and it will rarely (if ever) be mappable using Illumina sequencing.</p>
+<pre class="r"><code>dist.from.edge &lt;- rbind(
+  cbind(mm10.IAP.LTR.CpGs %&gt;%
+          filter(side==&quot;left&quot;) %&gt;%
+          group_by(element.ID) %&gt;%
+          summarize(dist=max(CG.pos-start)),
+        side=&quot;left&quot;),
+  cbind(mm10.IAP.LTR.CpGs %&gt;%
+          filter(side==&quot;right&quot;) %&gt;%
+          group_by(element.ID) %&gt;%
+          summarize(dist=max(end-CG.pos)),
+        side=&quot;right&quot;)
+)
+
+ggplot(dist.from.edge) +
+  geom_histogram(aes(x=dist), binwidth=20, center=10) +
+  theme_minimal(base_size=14) + 
+  ggtitle(sprintf(&quot;Distance from LTR edge to %s CpG&quot;, toOrdinal::toOrdinal(N.CPG))) + 
+  xlab(&quot;Distance [bp]&quot;) +
+  ylab(&quot;LTRs&quot;) +
+    scale_x_continuous(expand=c(0,0)) +
+    scale_y_continuous(expand=c(0,0)) +
+    theme(axis.text=element_text(color=&quot;black&quot;, size=12),
+                panel.grid.minor=element_blank())</code></pre>
+<p><img src="figure/02.Screen_for_VM_IAP.Rmd/nth.CpG.distance-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Indeed, many of the regions have their 8th CpG located deep within the repetitive region. This highlights the need to filter mapped reads by their MAPQ, as unconfidently-mapped reads may reach deep into the LTR.</p>
+</div>
+<div id="iap-ltr-methylation" class="section level1">
+<h1>IAP LTR methylation</h1>
+<pre class="r"><code>methy.data.dir &lt;- &quot;/data/blueprint/bs-seq/methy/BL6/near_IAP_500/&quot;
+
+methy.samples.B &lt;- get.files.and.names(methy.data.dir, &quot;^B6_[FM]_B_.*\\.methy\\.combined_strand\\..*\\.tsv$&quot;)
+methy.samples.T &lt;- get.files.and.names(methy.data.dir, &quot;^B6_[FM]_T_.*\\.methy\\.combined_strand\\..*\\.tsv$&quot;)
+
+
+LTR.methy.B &lt;- LTR.CpG.methy(mm10.IAP.LTR.CpGs,  methy.samples.B$files, methy.samples.B$names, 0, TRUE)
+LTR.methy.T &lt;- LTR.CpG.methy(mm10.IAP.LTR.CpGs,  methy.samples.T$files, methy.samples.T$names, 0, TRUE)
+
+#LTR.methy.adj.B &lt;- LTR.CpG.methy(mm10.IAP.LTR.adj.CpGs,  methy.samples.B$files, methy.samples.B$names, 0, TRUE)
+#LTR.methy.adj.T &lt;- LTR.CpG.methy(mm10.IAP.LTR.adj.CpGs,  methy.samples.T$files, methy.samples.T$names, 0, TRUE)</code></pre>
+<p>Initially, I was planning to calculate CpG-level methylation at each of the 8 CpGs nearest the unique region in each LTR. However, when we look at the actual coverage of CpGs in these regions, we find almost none of the CpGs passes a liberal threshold of 10x depth.</p>
+<pre class="r"><code>LTR.methy.B %&gt;%
+  dplyr::select(chrom, CG.pos, ends_with(&quot;mC&quot;)) %&gt;%
+  gather(&quot;sample&quot;, &quot;call.depth&quot;, -chrom, -CG.pos) %&gt;%
+  separate(sample, c(&quot;sample&quot;, &quot;call&quot;), sep=&quot;\\.&quot;) %&gt;%
+  replace_na(list(call.depth=0)) %&gt;%
+  group_by(chrom, CG.pos, sample) %&gt;%
+  summarize(depth=sum(call.depth)) %&gt;%
+  ggplot(aes(x=depth)) +
+    geom_histogram(binwidth=1, center=0.5) +
+    facet_grid(~ sample) +
+    xlim(c(0, 20)) +
+    ggtitle(&quot;Distribution of read depth at bordering CpGs of IAP LTRs&quot;, subtitle=&quot;B cell samples&quot;)</code></pre>
+<p>Thus, it makes more sense to consider the LTRs on a regional level. The strategy then is to combine all the methylation calls from each LTR edge, and produce a single methylation value which is not influenced by the depth of coverage at any of the individual CpGs.</p>
+<pre class="r"><code>MIN.N.CG &lt;- 4
+MIN.COUNT &lt;- 20
+MIN.SAMPS &lt;- 5
+
+LTR.means.B &lt;- element.mean(LTR.methy.B, MIN.N.CG)
+LTR.means.T &lt;- element.mean(LTR.methy.T, MIN.N.CG)
+
+#LTR.means.adj.B &lt;- element.mean(LTR.methy.adj.B, MIN.N.CG)
+#LTR.means.adj.T &lt;- element.mean(LTR.methy.adj.T, MIN.N.CG)
+
+LTR.ranges &lt;- purrr::reduce(list(
+  calculate.ranges(LTR.means.B, MIN.COUNT, MIN.SAMPS, &quot;B.&quot;),
+  calculate.ranges(LTR.means.T, MIN.COUNT, MIN.SAMPS, &quot;T.&quot;)
+), function(df1, df2) full_join(df1, df2, by=c(&quot;element.ID&quot;, &quot;side&quot;)))
+
+LTR.ranges.gr &lt;- df.as.gr(left_join(LTR.ranges, mm10.IAP.df, by=&quot;element.ID&quot;))
+
+#LTR.ranges.adj &lt;- purrr::reduce(list(
+#  calculate.ranges(LTR.means.adj.B, MIN.COUNT, MIN.SAMPS, &quot;B.&quot;),
+#  calculate.ranges(LTR.means.adj.T, MIN.COUNT, MIN.SAMPS, &quot;T.&quot;)
+#), function(df1, df2) full_join(df1, df2, by=c(&quot;element.ID&quot;, &quot;side&quot;)))</code></pre>
+<pre class="r"><code>LTR.ranges$mean1 &lt;- with(LTR.ranges, (B.range1+T.range1)/2)
+LTR.ranges$mean2 &lt;- with(LTR.ranges, (B.range2+T.range2)/2)
+LTR.ranges.filtered &lt;- LTR.ranges %&gt;%
+    group_by(element.ID) %&gt;%
+    arrange(desc(mean1)) %&gt;%
+    filter(row_number() == 1)
+
+
+VMIAP.validation &lt;- read_tsv(&quot;data/validation/validated_elements.tsv&quot;)
+VMIAP.validation$val_category &lt;- factor(VMIAP.validation$val_category, levels=c(&quot;Constitutive&quot;, &quot;Tissue-specific&quot;, &quot;False positive&quot;))
+val.elems.ovlp &lt;- as.data.frame(findOverlaps(df.as.gr(VMIAP.validation), mm10.IAP.gr))
+val.elems.ovlp$element.ID &lt;- mm10.IAP.gr[val.elems.ovlp$subjectHits]$element.ID
+val.elems.ovlp &lt;- val.elems.ovlp %&gt;%
+    dplyr::select(queryHits, element.ID) %&gt;%
+    distinct() %&gt;%
+    filter(element.ID != 3514891) # manually remove duplicate entry for fragmented element
+val.elems.ovlp$val_category &lt;- VMIAP.validation[val.elems.ovlp$queryHits,]$val_category
+val.elems.ovlp$new &lt;- VMIAP.validation[val.elems.ovlp$queryHits,]$new
+
+LTR.ranges.filtered &lt;- left_join(LTR.ranges.filtered, dplyr::select(val.elems.ovlp, -queryHits))
+# note: two of the validated elements are missing:
+# cVM-IAP Gm13849 (3329354) - insufficient coverage
+# tsVM-IAP Nelfa (3051431) - is a &#39;solo internal&#39; surrounded by RLTRs</code></pre>
+<p>The top new candidates identified in this screen, requiring that the difference in methy range between B and T cell samples is &lt;= 40% methylation (avoiding elements where one cell type is variable and one is not) and B + T cell range &gt;= 60% (selecting only elements with reasonably large ranges in both cell types), are:</p>
+<pre class="r"><code>right_join(
+    mm10.IAP.LTR.CpGs %&gt;%
+        dplyr::select(1:7) %&gt;%
+        distinct(),
+    LTR.ranges.filtered %&gt;%
+        filter((is.na(new) | new) &amp;
+                     (T.range1-0.6) &gt;= -B.range1 &amp;
+                     abs(T.range1-B.range1) &lt;= 0.4) %&gt;%
+        dplyr::select(element.ID, side, `B cell range`=B.range1, `T cell range`=T.range1),
+    by=c(&quot;element.ID&quot;, &quot;side&quot;)
+) %&gt;%
+    knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">chrom</th>
+<th align="right">start</th>
+<th align="right">end</th>
+<th align="left">strand</th>
+<th align="left">repName</th>
+<th align="right">element.ID</th>
+<th align="left">side</th>
+<th align="right">B cell range</th>
+<th align="right">T cell range</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chrX</td>
+<td align="right">50565246</td>
+<td align="right">50565556</td>
+<td align="left">+</td>
+<td align="left">IAPEY3C_LTR</td>
+<td align="right">4317001</td>
+<td align="left">right</td>
+<td align="right">0.3103448</td>
+<td align="right">0.5813953</td>
+</tr>
+<tr class="even">
+<td align="left">chr7</td>
+<td align="right">18403950</td>
+<td align="right">18404269</td>
+<td align="left">-</td>
+<td align="left">RLTR46A2</td>
+<td align="right">3563963</td>
+<td align="left">right</td>
+<td align="right">0.3705882</td>
+<td align="right">0.4283217</td>
+</tr>
+<tr class="odd">
+<td align="left">chr3</td>
+<td align="right">38672092</td>
+<td align="right">38672522</td>
+<td align="left">-</td>
+<td align="left">IAPLTR2a2_Mm</td>
+<td align="right">2522290</td>
+<td align="left">right</td>
+<td align="right">0.3477612</td>
+<td align="right">0.4176136</td>
+</tr>
+<tr class="even">
+<td align="left">chr12</td>
+<td align="right">64146318</td>
+<td align="right">64146450</td>
+<td align="left">-</td>
+<td align="left">IAPLTR2_Mm</td>
+<td align="right">898824</td>
+<td align="left">left</td>
+<td align="right">0.4714286</td>
+<td align="right">0.2916667</td>
+</tr>
+<tr class="odd">
+<td align="left">chr7</td>
+<td align="right">33982447</td>
+<td align="right">33982773</td>
+<td align="left">+</td>
+<td align="left">IAPEY4_LTR</td>
+<td align="right">3594349</td>
+<td align="left">right</td>
+<td align="right">0.3405253</td>
+<td align="right">0.3855219</td>
+</tr>
+<tr class="even">
+<td align="left">chr1</td>
+<td align="right">32588242</td>
+<td align="right">32588608</td>
+<td align="left">-</td>
+<td align="left">IAPLTR2a2_Mm</td>
+<td align="right">44590</td>
+<td align="left">right</td>
+<td align="right">0.3191489</td>
+<td align="right">0.3757310</td>
+</tr>
+<tr class="odd">
+<td align="left">chr15</td>
+<td align="right">96583063</td>
+<td align="right">96583367</td>
+<td align="left">-</td>
+<td align="left">IAPEY3C_LTR</td>
+<td align="right">1552154</td>
+<td align="left">right</td>
+<td align="right">0.2165948</td>
+<td align="right">0.4679487</td>
+</tr>
+<tr class="even">
+<td align="left">chr19</td>
+<td align="right">8019332</td>
+<td align="right">8019674</td>
+<td align="left">+</td>
+<td align="left">IAPLTR4</td>
+<td align="right">2055635</td>
+<td align="left">left</td>
+<td align="right">0.4212894</td>
+<td align="right">0.2565116</td>
+</tr>
+<tr class="odd">
+<td align="left">chr15</td>
+<td align="right">77683870</td>
+<td align="right">77684197</td>
+<td align="left">-</td>
+<td align="left">IAPEY4_LTR</td>
+<td align="right">1515510</td>
+<td align="left">left</td>
+<td align="right">0.4232303</td>
+<td align="right">0.2351648</td>
+</tr>
+<tr class="even">
+<td align="left">chr1</td>
+<td align="right">102909213</td>
+<td align="right">102909698</td>
+<td align="left">-</td>
+<td align="left">IAPLTR2a2_Mm</td>
+<td align="right">163087</td>
+<td align="left">left</td>
+<td align="right">0.2398957</td>
+<td align="right">0.4000000</td>
+</tr>
+<tr class="odd">
+<td align="left">chr15</td>
+<td align="right">103767007</td>
+<td align="right">103767333</td>
+<td align="left">+</td>
+<td align="left">IAPEY4_LTR</td>
+<td align="right">1569067</td>
+<td align="left">right</td>
+<td align="right">0.2807203</td>
+<td align="right">0.3500000</td>
+</tr>
+<tr class="even">
+<td align="left">chr10</td>
+<td align="right">102435268</td>
+<td align="right">102435594</td>
+<td align="left">+</td>
+<td align="left">IAPEY4_LTR</td>
+<td align="right">503393</td>
+<td align="left">right</td>
+<td align="right">0.3026961</td>
+<td align="right">0.3207991</td>
+</tr>
+<tr class="odd">
+<td align="left">chr14</td>
+<td align="right">43933140</td>
+<td align="right">43933467</td>
+<td align="left">+</td>
+<td align="left">IAPEY4_LTR</td>
+<td align="right">1261578</td>
+<td align="left">right</td>
+<td align="right">0.3399646</td>
+<td align="right">0.2784900</td>
+</tr>
+<tr class="even">
+<td align="left">chrX</td>
+<td align="right">157798018</td>
+<td align="right">157798487</td>
+<td align="left">+</td>
+<td align="left">IAPLTR2_Mm</td>
+<td align="right">4488835</td>
+<td align="left">left</td>
+<td align="right">0.2413793</td>
+<td align="right">0.3750000</td>
+</tr>
+<tr class="odd">
+<td align="left">chr5</td>
+<td align="right">23379564</td>
+<td align="right">23380035</td>
+<td align="left">+</td>
+<td align="left">IAPLTR2_Mm</td>
+<td align="right">3031126</td>
+<td align="left">left</td>
+<td align="right">0.4291667</td>
+<td align="right">0.1811688</td>
+</tr>
+<tr class="even">
+<td align="left">chr7</td>
+<td align="right">29597157</td>
+<td align="right">29597482</td>
+<td align="left">-</td>
+<td align="left">IAPEY4_LTR</td>
+<td align="right">3586706</td>
+<td align="left">left</td>
+<td align="right">0.2310292</td>
+<td align="right">0.3750285</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6</td>
+<td align="right">123931135</td>
+<td align="right">123931461</td>
+<td align="left">+</td>
+<td align="left">IAPEY4_LTR</td>
+<td align="right">3491398</td>
+<td align="left">right</td>
+<td align="right">0.2941176</td>
+<td align="right">0.3071038</td>
+</tr>
+</tbody>
+</table>
+<p>Each IAP is plotted below, showing B cell vs T cell ranges, highlighting the elements which have been validated. Circled elements are newly identified and validated since Kazachenka &amp; Bertozzi <em>et al</em>.</p>
+<pre class="r"><code>group.colors &lt;- c(&quot;Constitutive&quot; = &quot;#1b9e77&quot;, &quot;Tissue-specific&quot; = &quot;#d95f02&quot;, &quot;False positive&quot; = &quot;#8da0cb&quot;)
+
+ggplot(LTR.ranges.filtered, aes(x=B.range1, y=T.range1)) +
+  geom_point(alpha=0.3, size=2) +
+  geom_point(data=LTR.ranges.filtered %&gt;% filter(!is.na(val_category) &amp; !new),
+             aes(color=val_category), size=3) +
+    geom_point(data=LTR.ranges.filtered %&gt;% filter(new), aes(color=val_category), size=3) +
+    geom_point(data=LTR.ranges.filtered %&gt;% filter(new), size=4, shape=21) +
+    theme_bw(base_size=14) +
+    scale_x_continuous(name=&quot;B cell range&quot;, limits=c(0, 1), breaks=seq(0, 1, 0.2), expand=c(0, 0.02)) +
+    scale_y_continuous(name=&quot;T cell range&quot;, limits=c(0, 1), breaks=seq(0, 1, 0.2), expand=c(0, 0.02)) +
+    scale_color_manual(values=group.colors) +
+    theme(axis.text=element_text(color=&quot;black&quot;), legend.position=c(0.85, 0.85), legend.background = element_rect(color=&quot;black&quot;)) +
+    guides(color=guide_legend(title=&quot;Validation&quot;, title.hjust = 0.5))</code></pre>
+<p><img src="figure/02.Screen_for_VM_IAP.Rmd/plot.LTR.ranges-1.png" width="672" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.6.1 (2019-07-05)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Debian GNU/Linux 9 (stretch)
+
+Matrix products: default
+BLAS:   /usr/lib/libblas/libblas.so.3.7.0
+LAPACK: /usr/lib/lapack/liblapack.so.3.7.0
+
+locale:
+ [1] LC_CTYPE=en_GB.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_GB.UTF-8        LC_COLLATE=en_GB.UTF-8    
+ [5] LC_MONETARY=en_GB.UTF-8    LC_MESSAGES=en_GB.UTF-8   
+ [7] LC_PAPER=en_GB.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_GB.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] ggplot2_3.2.1        GenomicRanges_1.36.1 GenomeInfoDb_1.20.0 
+ [4] IRanges_2.18.3       S4Vectors_0.22.1     BiocGenerics_0.30.0 
+ [7] reshape2_1.4.3       readr_1.3.1          tidyr_1.0.0         
+[10] dplyr_0.8.3         
+
+loaded via a namespace (and not attached):
+ [1] toOrdinal_1.1-0.0      tidyselect_0.2.5       xfun_0.11             
+ [4] purrr_0.3.3            colorspace_1.4-1       vctrs_0.2.0           
+ [7] testthat_2.3.0         htmltools_0.4.0        yaml_2.2.0            
+[10] rlang_0.4.2            later_1.0.0            pillar_1.4.2          
+[13] glue_1.3.1             withr_2.1.2            GenomeInfoDbData_1.2.1
+[16] lifecycle_0.1.0        plyr_1.8.4             stringr_1.4.0         
+[19] zlibbioc_1.30.0        munsell_0.5.0          gtable_0.3.0          
+[22] workflowr_1.6.2        evaluate_0.14          labeling_0.3          
+[25] knitr_1.26             httpuv_1.5.2           highr_0.8             
+[28] Rcpp_1.0.3             promises_1.1.0         backports_1.1.5       
+[31] scales_1.1.0           XVector_0.24.0         farver_2.0.1          
+[34] fs_1.3.1               hms_0.5.2              digest_0.6.23         
+[37] stringi_1.4.3          rprojroot_1.3-2        grid_3.6.1            
+[40] tools_3.6.1            bitops_1.0-6           magrittr_1.5          
+[43] RCurl_1.95-4.12        lazyeval_0.2.2         tibble_2.1.3          
+[46] crayon_1.3.4           whisker_0.4            pkgconfig_2.0.3       
+[49] zeallot_0.1.0          ellipsis_0.3.0         assertthat_0.2.1      
+[52] rmarkdown_1.18         R6_2.4.1               git2r_0.26.1          
+[55] compiler_3.6.1        </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
