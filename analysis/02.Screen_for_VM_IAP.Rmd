@@ -130,7 +130,7 @@ plot.ranges <- function(rng.gr, x.col, y.col, side=NULL, ME.only = FALSE) {
 With an improved annotation of IAPs, the next step is to get a more robust set of DNA methylation levels at the CpGs within IAP LTRs from the Blueprint data.
 Because IAPs are of varying length and because their repetitive nature prevents Illumina reads from mapping unambiguously on the inside of the elements, only the outer-most CpGs on either edge of each IAP are considered.
 
-```{r load.IAP.reference, cache=TRUE}
+```{r load.IAP.reference, cache=FALSE}
 N.CPG <- 8
 
 mm10.IAP.gr <- readRDS("data/R_objects/mm10.IAP.gr.RDS")
@@ -246,7 +246,7 @@ LTR.methy.T <- LTR.CpG.methy(mm10.IAP.LTR.CpGs,  methy.samples.T$files, methy.sa
 Initially, I was planning to calculate CpG-level methylation at each of the 8 CpGs nearest the unique region in each LTR.
 However, when we look at the actual coverage of CpGs in these regions, we find almost none of the CpGs passes a liberal threshold of 10x depth.
 
-```{r methy.depth.dist.plt, fig.align="center", fig.width=8, fig.height=3.5, eval=FALSE}
+```{r methy.depth.dist.plt, fig.align="center", fig.width=8, fig.height=3.5}
 LTR.methy.B %>%
   dplyr::select(chrom, CG.pos, ends_with("mC")) %>%
   gather("sample", "call.depth", -chrom, -CG.pos) %>%
