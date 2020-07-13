@@ -1,0 +1,352 @@
+---
+title: "Screen for VM-IAPs"
+author: "Noah Kessler"
+#date: "01/02/2019"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapse: false
+    code_folding: "hide"
+---
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(readr)
+library(reshape2)
+library(GenomicRanges)
+library(ggplot2)
+
+knitr::opts_chunk$set(message = FALSE) 
+
+source("code/genomics_functions.R")
+source("code/data_functions.R")
+```
+
+```{r define.functions}
+CpGs.in.region <- function(CpG.gr, region.gr, N.CpG=0, from.right=FALSE) {
+  ovlps <- as.data.frame(findOverlaps(CpG.gr, region.gr))
+  ovlps$CG.pos <- start(CpG.gr[ovlps$queryHits])
+  if (from.right) {
+    ovlps <- ovlps %>% arrange(subjectHits, desc(CG.pos))
+  }
+  
+  selected.CGs <- ovlps %>%
+    group_by(subjectHits) %>%
+    mutate(CG.index=1:n())
+  if (N.CpG > 0) {
+    selected.CGs <- selected.CGs %>% top_n(-N.CpG, CG.index)
+  }
+  selected.CGs <- selected.CGs %>%
+    dplyr::select(-queryHits) %>%
+    as.data.frame()
+  
+  colnames(selected.CGs) <- c("index", "CG.pos", "CG.index")
+  selected.CGs$side <- if (from.right) "right" else "left"
+  selected.CGs
+}
+
+get.files.and.names <- function(dir, pattern) {
+  files <- file.path(dir, list.files(dir, pattern))
+  names <- as.character(
+    sapply(files, function(n) 
+      paste(strsplit(basename(n),"\\.")[[1]][1:2], collapse="_")
+  ))
+  list(names = names, files = files)
+}
+
+LTR.CpG.methy <- function(LTR.CG.df, files, sample.names, shift=0, just.counts=FALSE) {
+  stopifnot(length(sample.names) == length(files))
+  
+  for (f.idx in 1:length(files)) {
+    cat(sample.names[f.idx],"\n")
+     
+    sample.data <- read.table(files[f.idx], header=FALSE)
+    if (just.counts) {
+      colnames(sample.data) <- c("chrom", "CG.pos", 
+        paste0(sample.names[f.idx], ".umC"),   paste0(sample.names[f.idx], ".mC"))
+    } else {
+      colnames(sample.data) <- c("chrom", "CG.pos", 
+        paste0(sample.names[f.idx], ".umC"),   paste0(sample.names[f.idx], ".mC"),
+        paste0(sample.names[f.idx], ".depth"), paste0(sample.names[f.idx], ".methy"))
+    }
+    sample.data$chrom <- factor(sample.data$chrom, levels=levels(LTR.CG.df$chrom))
+    sample.data$CG.pos <- sample.data$CG.pos + shift #shift to 1-indexed pos
+    
+    LTR.CG.df <- left_join(LTR.CG.df, sample.data, by=c("chrom", "CG.pos"))
+  }
+  
+  LTR.CG.df
+}
+
+element.mean <- function(CG.methy, min.N.CG=0) {
+  CG.methy %>%
+    dplyr::select(element.ID, side, CG.index, ends_with(".umC"), ends_with(".mC")) %>%
+    gather("samp_state", "count", ends_with("mC")) %>%
+    separate(samp_state, c("sample", "m.state"), "\\.") %>%
+    spread(m.state, count) %>%
+    filter(!is.na(mC) & !is.na(umC)) %>%
+    group_by(element.ID, side, sample) %>%
+    filter(n() >= min.N.CG) %>%
+    summarize(total.count = sum(mC+umC), methy=sum(mC) / total.count)
+}
+
+calculate.ranges <- function(means, min.count, min.samps, prefix=NULL) {
+  means %>%
+    filter(total.count >= min.count) %>%
+    group_by(element.ID, side) %>%
+    filter(n() >= min.samps) %>%
+    arrange(desc(methy)) %>%
+    summarize(range1=first(methy)-last(methy),
+              range2=nth(methy, 2)-nth(methy,n()-1)) %>%
+    { if (!is.null(prefix))
+        rename_at(., vars(-c("element.ID", "side")), ~ paste0(prefix, .))
+      else .
+    }
+}
+
+plot.ranges <- function(rng.gr, x.col, y.col, side=NULL, ME.only = FALSE) {
+  if (!is.null(side)) rng.gr <- rng.gr[rng.gr$side == side]
+  if (!ME.only) {
+    plt <- ggplot(rng.gr, aes_string(x=x.col, y=y.col)) +
+    geom_point(alpha=0.3) 
+  } else {
+    plt <- ggplot(rng.gr, mapping = aes_string(x=x.col, y=y.col))
+  }
+  plt <- plt + 
+    geom_point(data=rng.gr %>% filter(!is.na(ME)), aes(fill=ME), shape=21) +
+    geom_hline(yintercept=0.1, color="blue", alpha=0.5) +
+    geom_vline(xintercept=0.1, color="blue", alpha=0.5) +
+    theme_bw()
+  
+  plt
+}
+```
+
+# Location of CpGs in IAP LTRs
+
+With an improved annotation of IAPs, the next step is to get a more robust set of DNA methylation levels at the CpGs within IAP LTRs from the Blueprint data.
+Because IAPs are of varying length and because their repetitive nature prevents Illumina reads from mapping unambiguously on the inside of the elements, only the outer-most CpGs on either edge of each IAP are considered.
+
+```{r load.IAP.reference, cache=TRUE}
+N.CPG <- 8
+
+mm10.IAP.gr <- readRDS("data/R_objects/mm10.IAP.gr.RDS")
+
+# look at 'left'-most CpGs from the 5' end of + strand LTRs
+# and from the 3' end of - strand LTRs
+mm10.IAP.LTR.look_left <- mm10.IAP.gr[with(mm10.IAP.gr,
+  is.LTR & ((first.subelement & strand == "+") | (last.subelement & strand == "-"))
+)]
+
+# look at 'right'-most CpGs from the 3' end of + strand LTRs
+# and from the 5' end of - strand LTRs
+mm10.IAP.LTR.look_right <- mm10.IAP.gr[with(mm10.IAP.gr,
+  is.LTR & ((first.subelement & strand == "-") | (last.subelement & strand == "+"))
+)]
+
+# load mm10 CpG locations
+mm10.CpG.gr <- sortSeqlevels(readRDS("data/R_objects/mm10.CpG.gr.RDS"))
+mm10.CpG.gr <- sort(mm10.CpG.gr) # should be sorted, but force anyway since it's needed
+
+# define relevant CpGs
+mm10.IAP.LTR.CpGs <- rbind(
+  index.r_join(
+    mm10.IAP.LTR.look_left, 
+    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.look_left, N.CPG, FALSE)
+  ),
+  index.r_join(
+    mm10.IAP.LTR.look_right,
+    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.look_right, N.CPG, TRUE)
+  )
+) %>%
+  arrange(element.ID, side, CG.index) %>%
+  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
+
+colnames(mm10.IAP.LTR.CpGs)[1] <- "chrom"
+
+mm10.IAP.df <- mm10.IAP.gr %>%
+  as.data.frame() %>%
+  group_by(element.ID, seqnames, strand) %>%
+  summarize(start=min(start), end=max(end))
+
+#mm10.IAP.LTR.adj.CpGs <- rbind(
+#  index.r_join(mm10.IAP.LTR.look_left, CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_right, 0, TRUE)),
+#  index.r_join(mm10.IAP.LTR.look_right, CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_left, 0, FALSE))
+#) %>%
+#  arrange(element.ID, side, CG.index) %>%
+#  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
+#
+#mm10.IAP.LTR.adj.CpGs <- rbind(
+#  index.r_join(
+#    mm10.IAP.LTR.look_left,
+#    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_right, 0, TRUE)
+#  ),
+#  index.r_join(
+#    mm10.IAP.LTR.look_right,
+#    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_left, 0, FALSE)
+#  )
+#) %>%
+#  arrange(element.ID, side, CG.index) %>%
+#  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
+#colnames(mm10.IAP.LTR.adj.CpGs)[1] <- "chrom"
+```
+
+The number of CpGs selected for these analyses is `r N.CPG`.
+How far do `r N.CPG` CpGs tend to reach inside of the repeat?
+If the `r toOrdinal::toOrdinal(N.CPG)` CpG is too far inside of the repeat, and it will rarely (if ever) be mappable using Illumina sequencing.
+
+```{r nth.CpG.distance}
+dist.from.edge <- rbind(
+  cbind(mm10.IAP.LTR.CpGs %>%
+          filter(side=="left") %>%
+          group_by(element.ID) %>%
+          summarize(dist=max(CG.pos-start)),
+        side="left"),
+  cbind(mm10.IAP.LTR.CpGs %>%
+          filter(side=="right") %>%
+          group_by(element.ID) %>%
+          summarize(dist=max(end-CG.pos)),
+        side="right")
+)
+
+ggplot(dist.from.edge) +
+  geom_histogram(aes(x=dist), binwidth=20, center=10) +
+  theme_minimal(base_size=14) + 
+  ggtitle(sprintf("Distance from LTR edge to %s CpG", toOrdinal::toOrdinal(N.CPG))) + 
+  xlab("Distance [bp]") +
+  ylab("LTRs") +
+	scale_x_continuous(expand=c(0,0)) +
+	scale_y_continuous(expand=c(0,0)) +
+	theme(axis.text=element_text(color="black", size=12),
+				panel.grid.minor=element_blank())
+```
+
+Indeed, many of the regions have their `r toOrdinal::toOrdinal(N.CPG)` CpG located deep within the repetitive region.
+This highlights the need to filter mapped reads by their MAPQ, as unconfidently-mapped reads may reach deep into the LTR.
+
+# IAP LTR methylation
+
+```{r load.methy.data, results='hide'}
+methy.data.dir <- "/data/blueprint/bs-seq/methy/BL6/near_IAP_500/"
+
+methy.samples.B <- get.files.and.names(methy.data.dir, "^B6_[FM]_B_.*\\.methy\\.combined_strand\\..*\\.tsv$")
+methy.samples.T <- get.files.and.names(methy.data.dir, "^B6_[FM]_T_.*\\.methy\\.combined_strand\\..*\\.tsv$")
+
+
+LTR.methy.B <- LTR.CpG.methy(mm10.IAP.LTR.CpGs,  methy.samples.B$files, methy.samples.B$names, 0, TRUE)
+LTR.methy.T <- LTR.CpG.methy(mm10.IAP.LTR.CpGs,  methy.samples.T$files, methy.samples.T$names, 0, TRUE)
+
+#LTR.methy.adj.B <- LTR.CpG.methy(mm10.IAP.LTR.adj.CpGs,  methy.samples.B$files, methy.samples.B$names, 0, TRUE)
+#LTR.methy.adj.T <- LTR.CpG.methy(mm10.IAP.LTR.adj.CpGs,  methy.samples.T$files, methy.samples.T$names, 0, TRUE)
+```
+
+Initially, I was planning to calculate CpG-level methylation at each of the 8 CpGs nearest the unique region in each LTR.
+However, when we look at the actual coverage of CpGs in these regions, we find almost none of the CpGs passes a liberal threshold of 10x depth.
+
+```{r methy.depth.dist.plt, fig.align="center", fig.width=8, fig.height=3.5, eval=FALSE}
+LTR.methy.B %>%
+  dplyr::select(chrom, CG.pos, ends_with("mC")) %>%
+  gather("sample", "call.depth", -chrom, -CG.pos) %>%
+  separate(sample, c("sample", "call"), sep="\\.") %>%
+  replace_na(list(call.depth=0)) %>%
+  group_by(chrom, CG.pos, sample) %>%
+  summarize(depth=sum(call.depth)) %>%
+  ggplot(aes(x=depth)) +
+    geom_histogram(binwidth=1, center=0.5) +
+    facet_grid(~ sample) +
+    xlim(c(0, 20)) +
+    ggtitle("Distribution of read depth at bordering CpGs of IAP LTRs", subtitle="B cell samples")
+```
+
+Thus, it makes more sense to consider the LTRs on a regional level.
+The strategy then is to combine all the methylation calls from each LTR edge, and produce a single methylation value which is not influenced by the depth of coverage at any of the individual CpGs.
+
+```{r methy.by.element}
+MIN.N.CG <- 4
+MIN.COUNT <- 20
+MIN.SAMPS <- 5
+
+LTR.means.B <- element.mean(LTR.methy.B, MIN.N.CG)
+LTR.means.T <- element.mean(LTR.methy.T, MIN.N.CG)
+
+#LTR.means.adj.B <- element.mean(LTR.methy.adj.B, MIN.N.CG)
+#LTR.means.adj.T <- element.mean(LTR.methy.adj.T, MIN.N.CG)
+
+LTR.ranges <- purrr::reduce(list(
+  calculate.ranges(LTR.means.B, MIN.COUNT, MIN.SAMPS, "B."),
+  calculate.ranges(LTR.means.T, MIN.COUNT, MIN.SAMPS, "T.")
+), function(df1, df2) full_join(df1, df2, by=c("element.ID", "side")))
+
+LTR.ranges.gr <- df.as.gr(left_join(LTR.ranges, mm10.IAP.df, by="element.ID"))
+
+#LTR.ranges.adj <- purrr::reduce(list(
+#  calculate.ranges(LTR.means.adj.B, MIN.COUNT, MIN.SAMPS, "B."),
+#  calculate.ranges(LTR.means.adj.T, MIN.COUNT, MIN.SAMPS, "T.")
+#), function(df1, df2) full_join(df1, df2, by=c("element.ID", "side")))
+```
+
+```{r add.validation.info}
+LTR.ranges$mean1 <- with(LTR.ranges, (B.range1+T.range1)/2)
+LTR.ranges$mean2 <- with(LTR.ranges, (B.range2+T.range2)/2)
+LTR.ranges.filtered <- LTR.ranges %>%
+	group_by(element.ID) %>%
+	arrange(desc(mean1)) %>%
+	filter(row_number() == 1)
+
+
+VMIAP.validation <- read_tsv("data/validation/validated_elements.tsv")
+VMIAP.validation$val_category <- factor(VMIAP.validation$val_category, levels=c("Constitutive", "Tissue-specific", "False positive"))
+val.elems.ovlp <- as.data.frame(findOverlaps(df.as.gr(VMIAP.validation), mm10.IAP.gr))
+val.elems.ovlp$element.ID <- mm10.IAP.gr[val.elems.ovlp$subjectHits]$element.ID
+val.elems.ovlp <- val.elems.ovlp %>%
+	dplyr::select(queryHits, element.ID) %>%
+	distinct() %>%
+	filter(element.ID != 3514891) # manually remove duplicate entry for fragmented element
+val.elems.ovlp$val_category <- VMIAP.validation[val.elems.ovlp$queryHits,]$val_category
+val.elems.ovlp$new <- VMIAP.validation[val.elems.ovlp$queryHits,]$new
+
+LTR.ranges.filtered <- left_join(LTR.ranges.filtered, dplyr::select(val.elems.ovlp, -queryHits))
+# note: two of the validated elements are missing:
+# cVM-IAP Gm13849 (3329354) - insufficient coverage
+# tsVM-IAP Nelfa (3051431) - is a 'solo internal' surrounded by RLTRs
+```
+
+The top new candidates identified in this screen, requiring that the difference in methy range between B and T cell samples is <= 40% methylation (avoiding elements where one cell type is variable and one is not) and B + T cell range >= 60% (selecting only elements with reasonably large ranges in both cell types), are:
+
+```{r candidate.table, results='asis'}
+right_join(
+	mm10.IAP.LTR.CpGs %>%
+		dplyr::select(1:7) %>%
+		distinct(),
+	LTR.ranges.filtered %>%
+		filter((is.na(new) | new) &
+					 (T.range1-0.6) >= -B.range1 &
+					 abs(T.range1-B.range1) <= 0.4) %>%
+		dplyr::select(element.ID, side, `B cell range`=B.range1, `T cell range`=T.range1),
+	by=c("element.ID", "side")
+) %>%
+	knitr::kable()
+```
+
+Each IAP is plotted below, showing B cell vs T cell ranges, highlighting the elements which have been validated. Circled elements are newly identified and validated since Kazachenka & Bertozzi _et al_.
+
+```{r plot.LTR.ranges, fig.align='center', fig.width=7, fig.height=7, warning=FALSE}
+group.colors <- c("Constitutive" = "#1b9e77", "Tissue-specific" = "#d95f02", "False positive" = "#8da0cb")
+
+ggplot(LTR.ranges.filtered, aes(x=B.range1, y=T.range1)) +
+  geom_point(alpha=0.3, size=2) +
+  geom_point(data=LTR.ranges.filtered %>% filter(!is.na(val_category) & !new),
+             aes(color=val_category), size=3) +
+	geom_point(data=LTR.ranges.filtered %>% filter(new), aes(color=val_category), size=3) +
+	geom_point(data=LTR.ranges.filtered %>% filter(new), size=4, shape=21) +
+	theme_bw(base_size=14) +
+	scale_x_continuous(name="B cell range", limits=c(0, 1), breaks=seq(0, 1, 0.2), expand=c(0, 0.02)) +
+	scale_y_continuous(name="T cell range", limits=c(0, 1), breaks=seq(0, 1, 0.2), expand=c(0, 0.02)) +
+	scale_color_manual(values=group.colors) +
+	theme(axis.text=element_text(color="black"), legend.position=c(0.85, 0.85), legend.background = element_rect(color="black")) +
+	guides(color=guide_legend(title="Validation", title.hjust = 0.5))
+```
+
