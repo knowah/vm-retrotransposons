@@ -23,7 +23,8 @@ See [01.IAP_Annotations.html](01.IAP_Annotations.html).
 
 ## Updated screen for VM-IAPs
 
-Analyses to be added.
+An update of the screen for VM-IAPs, similar to that performed in Kazachenka & Bertozzi _et al_., using the improved reference and with some improvements in implementation.
+See [02.Screen_for_VM_IAP.html](02.Screen_for_VM_IAP.html).
 
 ## Validations and tsVM-IAPs
 
