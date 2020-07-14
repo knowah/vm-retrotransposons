@@ -85,7 +85,7 @@ with gzip.open(r.rmsk_full, 'rt') as rmskf, gzip.open(r.rmsk_iap_orig, 'wt') as 
 fix_RM_breaks(r.rmsk_iap_orig, seq_gap=r.break_fix_seq_gap, rep_gap=r.break_fix_rep_gap, outfile=r.rmsk_iap_break_fix)
 ```
 
-```{r load.IAP.data, cache=TRUE}
+```{r load.IAP.data}
 # note: start coords are 0-based
 mm10.IAP <- read.table(rmsk_iap_break_fix)
 colnames(mm10.IAP) <- c("chrom", "start", "end", "strand", "repName", "repClass", "repFamily", "repStart", "repEnd", "element.ID")
@@ -126,7 +126,7 @@ if (make.seq.fasta) {
 }
 ```
 
-```{r refine.IAP.structure, include=FALSE, eval=FALSE, cache=TRUE}
+```{r refine.IAP.structure, include=FALSE, eval=FALSE}
 REFINE.MAX.GAP <- 0
 mm10.IAP.refined <- GRanges()
 REFINE.DEBUG <- FALSE
@@ -257,7 +257,7 @@ mm10.IAP.reduced$basic.structure <- sapply(
 mm10.IAP.reduced <- cbind(mm10.IAP.reduced, analyse.structure(mm10.IAP.reduced$basic.structure))
 ```
 
-```{r fix.partial.IAPs, cache=TRUE}
+```{r fix.partial.IAPs}
 # iterate through incomplete IAPs (!solo & !full) and try to join them with nearby elements
 PARTIAL.JOIN.GAP <- 2000 # max distance between partial elements to join them
 
