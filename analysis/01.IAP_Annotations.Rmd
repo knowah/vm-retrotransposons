@@ -25,9 +25,10 @@ library(ggplot2)
 library(knitr)
 library(kableExtra)
 library(reticulate)
+library(tidyr)
 use_python(Sys.which("python3"))
 
-source("utils/data_functions.R")
+source("code/data_functions.R")
 ```
 
 # Background
@@ -95,7 +96,10 @@ mcols(mm10.IAP.gr) <- mm10.IAP[,-c(1:4)]
 After these steps, there are `r nrow(mm10.IAP)` IAP (sub)element entries, representing `r length(unique(mm10.IAP$element.ID))` IAP elements. These elements are made up of `r length(unique(mm10.IAP$repName))` IAP subelement types:
 *`r paste(unique(mm10.IAP$repName), sep=", ")`*.
 
-Within an IAP, the subelements may be missing components (relative to their full-length reference), or be broken up by other retroelements that have inserted themselves within the element. Note that many of the subelements which appear multiple times in the same IAP are often actually fragmented parts of a full subelement.
+**NB: In the following analyses, element names are missing the 'IAP' prefix for brevity.**
+
+Within an IAP, the subelements may be missing components (relative to their full-length reference), or be broken up by other retroelements that have inserted themselves within the element.
+Note that many of the subelements which appear multiple times in the same IAP are often actually fragmented parts of a full subelement.
 
 # Refining structure
 
@@ -203,12 +207,11 @@ mm10.IAP.reduced.counts <- count.df(mm10.IAP.reduced, "reduced.structure", "Geno
 
 ```
 
-A faster and more digestible solution was to simply 'collapse' adjacent subelements of the same type into a single subelement of that type (e.g., `IAPLTR1a_Mm || IAPEz-int || IAPEz-int || IAPLTR1a_Mm` becomes `IAPLTR1a_Mm || IAPEz-int || IAPLTR1a_Mm`).
+A faster and more digestible solution was to simply 'collapse' adjacent subelements of the same type into a single subelement of that type (e.g., `LTR1a_Mm || Ez-int || Ez-int || LTR1a_Mm` becomes `LTR1a_Mm || Ez-int || LTR1a_Mm`).
 This results in `r length(unique(mm10.IAP.reduced$reduced.structure))` unique IAP element structures, shown below with their frequency in the genome:
 
 `r knitr::kable(mm10.IAP.reduced.counts %>% mutate(Structure=gsub("IAP-?", "", gsub("\\|", " || ", reduced.structure))) %>% select(Structure, Genome) %>% arrange(desc(Genome))) %>% kable_styling() %>% scroll_box(height="240px")`
 
-_NB: In the list above and plot below, element names are missing the 'IAP' prefix for brevity._
 
 # Fixing fragmented IAPs
 
@@ -221,7 +224,8 @@ However, when looking at the genome browser, it is often apparent that these are
 
 </center>
 
-To fix these, I will look for at elements of the annotation of the three patterns above, and try to stitch them together. For example, if an `LTR || internal` element is followed by an `internal || LTR` element nearby (or even a solo LTR), I will combine them.
+To fix these, I will look for at elements of the annotation of the three patterns above, and try to stitch them together.
+For example, if an `LTR || internal` element is followed by an `internal || LTR` element nearby (or even a solo LTR), I will combine them.
 
 ```{r basic.structure}
 get.basic.structure <- function(reduced.s) {
@@ -377,13 +381,15 @@ mm10.IAP.mended <- distinct(
 )
 ```
 
-This process resulted in `r with(mm10.IAP.mended, sum(orig.element.ID != element.ID))` elements being combined with other elements, and increased the number of fully-structured IAPs from `r sum(mm10.IAP.reduced.old$fully.structured)` to `r sum(mm10.IAP.reduced$fully.structured)`. An example of the mended vs old (RepeatMasker) annotation is shown below:
+This process resulted in `r with(mm10.IAP.mended, sum(orig.element.ID != element.ID))` elements being combined with other elements, and increased the number of fully-structured IAPs from `r sum(mm10.IAP.reduced.old$fully.structured)` to `r sum(mm10.IAP.reduced$fully.structured)`.
+In total, there are now `r length(unique(mm10.IAP.reduced$element.ID))` IAP elements. An example of the mended vs old (RepeatMasker) annotation is shown below:
 
 ```{r plot.old.vs.new, fig.align='center', fig.height=3}
 plot.elem <- function(elem.id) {
   elem.df <- mm10.IAP.gr[mm10.IAP.gr$element.ID %in% elem.id | mm10.IAP.gr$orig.element.ID %in% elem.id] %>% as.data.frame()
-  elem.df$IAP.type <- sapply(as.character(elem.df$repName), function(x) c("LTR", "internal")[
-    1+as.numeric(grepl(".*[-int|_I]$",strsplit(x, "\\|")[[1]]))
+  elem.df$IAP.type <- sapply(as.character(elem.df$repName),
+    function(x) c("LTR", "internal")[
+      1+as.numeric(grepl(".*[-int|_I]$",strsplit(x, "\\|")[[1]]))
     ])
   N.elements <- nrow(elem.df)
   elem.df <- rbind(elem.df, elem.df)
@@ -431,190 +437,44 @@ mcols(mm10.IAP.gr)[strand(mm10.IAP.gr)=='-', c("first.subelement", "last.subelem
 
 mm10.IAP.gr$is.LTR <- !grepl(".*[-int|_I]$", mm10.IAP.gr$repName)
 saveRDS(mm10.IAP.gr, file.path("data", "R_objects", "mm10.IAP.gr.RDS"))
+saveRDS(mm10.IAP.reduced, file.path("data", "R_objects", "mm10.IAP.reduced.RDS"))
 ```
 
-# Structure of MEs
+A breakdown of the change in IAP element structures is shown below. 
 
-What kind of IAP element structure do we see at MEs? How does this compare with the whole genome and with false positives? 
+```{r compare.old.vs.new, results='asis'}
+mending.summary <- rbind(
+	mm10.IAP.reduced.old %>%
+		group_by(solo.LTR, fully.structured, basic.structure) %>%
+		summarize(N=n()) %>%
+		mutate(Which="Old"),
+	mm10.IAP.reduced %>%
+		group_by(solo.LTR, fully.structured, basic.structure) %>%
+		summarize(N=n()) %>%
+		mutate(Which="New")
+) %>%
+	ungroup() %>%
+	pivot_wider(values_from="N", names_from="Which", values_fill=list("N"=0)) %>%
+	arrange(desc(solo.LTR), desc(fully.structured), basic.structure) %>%
+	mutate(
+		Classification=
+			ifelse(solo.LTR, "Solo LTR",
+			ifelse(fully.structured, "Fully-structured",
+				"Fragmented"
+	))) %>%
+	dplyr::select(Classification, Structure=basic.structure, Old, New)
 
-** Need to run next section; maybe in new file? either way absolute paths need to be fixed, and interpretation below checked **
-
-```{r structure.of.MEs, eval=FALSE}
-mm10.IAP.top_name.structure <- mm10.IAP.gr %>% as.data.frame() %>%
-  dplyr::select(element.ID, repName, is.LTR, width) %>%
-  group_by(element.ID, is.LTR, repName) %>%
-  summarize(total.bp=sum(width)) %>%
-  group_by(element.ID, is.LTR) %>%
-  filter(1:n()==1) %>% 
-  ungroup() %>% # test
-  arrange(element.ID, !is.LTR) %>%
-  group_by(element.ID) %>%
-  summarize(top.names=paste(repName, collapse=" – "))
-
-mm10.IAP.reduced <- left_join(mm10.IAP.reduced, mm10.IAP.top_name.structure, by="element.ID")
-mm10.IAP.reduced$optimal.structure <- with(mm10.IAP.reduced,
-                                      ifelse(solo.LTR | fully.structured,
-                                             top.names,
-                                             reduced.structure))
-
-
-
-ME.validation <- read.table("/data/reference/ME/IAP_validation.July2019.tsv", sep="\t", header=TRUE, stringsAsFactors=FALSE)
-ME.validation.gr <- unlist(as(lapply(ME.validation$Coordinates, ucsc2gr), "GRangesList"))
-ME.validation.gr$Category <- ME.validation$Category
-
-element_ID.ME <- unique(subsetByOverlaps(mm10.IAP.gr, ME.validation.gr[ME.validation.gr$Category=="True ME"])$element.ID)
-element_ID.TS <- unique(subsetByOverlaps(mm10.IAP.gr, ME.validation.gr[ME.validation.gr$Category=="Tissue-specific"])$element.ID)
-#FIX ME
-element_ID.TS <- setdiff(element_ID.TS, 3514893)
-element_ID.FP <- unique(subsetByOverlaps(mm10.IAP.gr, ME.validation.gr[ME.validation.gr$Category=="False-positive"])$element.ID)
+knitr::kable(mending.summary) %>%
+	kable_styling() 
 
 
-mm10.IAP.optimal.counts <- count.df(mm10.IAP.reduced, "optimal.structure", "Genome")
-mm10.IAP.optimal.counts <- left_join(mm10.IAP.optimal.counts, mm10.IAP.reduced[,c("optimal.structure", "basic.structure")] %>% distinct, by="optimal.structure")
-
-mm10.IAP.optimal.counts$elem.class <- "Broken"
-mm10.IAP.optimal.counts[mm10.IAP.optimal.counts$basic.structure =="LTR",]$elem.class <- "Solo LTR"
-mm10.IAP.optimal.counts[grepl("^LTR-.*-LTR$",mm10.IAP.optimal.counts$basic.structure),]$elem.class <- "Fully-structured"
-
-mm10.IAP.optimal.counts$elem.class.2 <- "Solo LTR"
-mm10.IAP.optimal.counts[mm10.IAP.optimal.counts$elem.class!="Solo LTR",]$elem.class.2 <- "Fully-structured or Incomplete"
-                                     
-mm10.IAP.optimal.counts <- left_join(mm10.IAP.optimal.counts,
-                                     count.df(mm10.IAP.reduced %>% filter(element.ID %in% element_ID.ME), "optimal.structure", "Constitutive ME"))
-mm10.IAP.optimal.counts <- left_join(mm10.IAP.optimal.counts,
-                                     count.df(mm10.IAP.reduced %>% filter(element.ID %in% element_ID.TS), "optimal.structure", "Tissue-Specific"))
-
-mm10.IAP.optimal.counts <- mm10.IAP.optimal.counts %>% arrange(desc(Genome))
-
-mm10.IAP.optimal.counts.norm <- mm10.IAP.optimal.counts %>%
-  mutate_if(is.numeric, function(x) x / max(x, na.rm=TRUE))
-mm10.IAP.opt.cnt.plt.df <- mm10.IAP.optimal.counts.norm %>%
-  mutate(order=1:n()) %>%
-  filter(!is.na(`Constitutive ME`) | !is.na(`Tissue-Specific`)) %>%
-  melt(id.vars=c("optimal.structure", "order", "basic.structure", "elem.class", "elem.class.2"), variable.name="set", value.name="N") %>%
-  arrange(desc(order))
-
-mm10.IAP.opt.cnt.plt.df[is.na(mm10.IAP.opt.cnt.plt.df)]<- 0.001 # show something even if none
-mm10.IAP.opt.cnt.plt.df[mm10.IAP.opt.cnt.plt.df$N < 0.001] <- 0.001
-mm10.IAP.opt.cnt.plt.df$optimal.structure <- gsub("\\|", " || ", gsub("IAP-?", "", mm10.IAP.opt.cnt.plt.df$optimal.structure))
-mm10.IAP.opt.cnt.plt.df$optimal.structure <- factor(mm10.IAP.opt.cnt.plt.df$optimal.structure, levels=unique(mm10.IAP.opt.cnt.plt.df$optimal.structure))
-
-group.colors <- c(Genome = "#444444", `Constitutive ME` = "#1b9e77", `Tissue-Specific` = "#d95f02")
-
-ggplot(mm10.IAP.opt.cnt.plt.df, aes(x=optimal.structure)) +
-  geom_bar(aes(y=N, fill=forcats::fct_rev(set)), stat="identity", position="dodge") +
-  coord_flip() + theme_bw(base_size=14) +
-  ylab("Relative frequency of element structure") + xlab(NULL) +
-  theme(panel.grid.major.y = element_blank(), axis.text.y = element_text(face="bold")) +
-  scale_y_continuous(expand=c(0, 0.01)) +
-  scale_fill_manual(guide=guide_legend(reverse=TRUE, title=NULL), values=group.colors) +
-  facet_grid(vars(elem.class.2),  scales = "free_y", space="free_y") #+
-  #ggtitle("Distribution of IAP element structure")
-
-### for pub
-ggplot(mm10.IAP.opt.cnt.plt.df, aes(x=optimal.structure)) +
-  geom_bar(aes(y=N, fill=forcats::fct_rev(set)), stat="identity", position="dodge") +
-  coord_flip() + theme_bw(base_size=22) +
-  ylab("Relative frequency of element structure") + xlab(NULL) +
-  theme(panel.grid.major.y = element_blank(),
-        axis.text.y = element_text(face="bold", size=16),
-        axis.ticks.y = element_line(color="black", size=10),
-        axis.ticks.length.y = unit(0.03, "cm"),
-        legend.position = c(0.825, 0.075),
-        legend.background=element_rect(color="black"),
-        legend.title=element_blank(),
-        legend.margin=margin(0, 0.25, 0.25, 0.2, unit='cm')) +
-  scale_y_continuous(expand=c(0, 0.01)) +
-  scale_fill_manual(guide=guide_legend(reverse=TRUE), values=group.colors) +
-  facet_grid(vars(elem.class.2),  scales = "free_y", space="free_y") #+
-###
-
-
-
-
-
-
-
-
-
-
-mm10.IAP.reduced.counts <- left_join(mm10.IAP.reduced.counts, mm10.IAP.reduced[,c("reduced.structure", "basic.structure")] %>% distinct,
-                                     by="reduced.structure")
-
-mm10.IAP.reduced.counts$class <- "Broken"
-mm10.IAP.reduced.counts[mm10.IAP.reduced.counts$basic.structure =="LTR",]$class <- "Solo LTR"
-mm10.IAP.reduced.counts[grepl("^LTR-.*-LTR$",mm10.IAP.reduced.counts$basic.structure),]$class <- "Fully-structured"
-
-mm10.IAP.reduced.counts <- left_join(mm10.IAP.reduced.counts,
-                                     count.df(mm10.IAP.reduced %>% filter(element.ID %in% element_ID.ME), "reduced.structure", "True ME"))
-mm10.IAP.basic.counts <- left_join(mm10.IAP.basic.counts,
-                                     count.df(mm10.IAP.reduced %>% filter(element.ID %in% element_ID.ME), "basic.structure", "True ME"))
-mm10.IAP.reduced.counts <- left_join(mm10.IAP.reduced.counts,
-                                     count.df(mm10.IAP.reduced %>% filter(element.ID %in% element_ID.TS), "reduced.structure", "Tissue-Specific"))
-mm10.IAP.basic.counts <- left_join(mm10.IAP.basic.counts,
-                                     count.df(mm10.IAP.reduced %>% filter(element.ID %in% element_ID.TS), "basic.structure", "Tissue-Specific"))
-mm10.IAP.reduced.counts <- left_join(mm10.IAP.reduced.counts,
-                                     count.df(mm10.IAP.reduced %>% filter(element.ID %in% element_ID.FP), "reduced.structure", "False Positive"))
-mm10.IAP.basic.counts <- left_join(mm10.IAP.basic.counts,
-                                     count.df(mm10.IAP.reduced %>% filter(element.ID %in% element_ID.FP), "basic.structure", "False Positive"))
-
-mm10.IAP.reduced.counts <- mm10.IAP.reduced.counts %>% arrange(desc(Genome))
-mm10.IAP.basic.counts <- mm10.IAP.basic.counts %>% arrange(desc(Genome))
-
-mm10.IAP.reduced.counts.norm <- mm10.IAP.reduced.counts %>%
-  mutate_if(is.numeric, function(x) x / max(x, na.rm=TRUE))
-mm10.IAP.basic.counts.norm <- mm10.IAP.basic.counts %>%
-  mutate_if(is.numeric, function(x) x / max(x, na.rm=TRUE))
-
-mm10.IAP.red.cnt.plt.df <- mm10.IAP.reduced.counts.norm %>%
-  mutate(order=1:n()) %>%
-  filter(!is.na(`True ME`) | !is.na(`False Positive` | !is.na(`Tissue-Specific`))) %>%
-  melt(id.vars=c("reduced.structure", "order", "basic.structure", "class"), variable.name="set", value.name="N") %>%
-  arrange(desc(order))
-mm10.IAP.red.cnt.plt.df[is.na(mm10.IAP.red.cnt.plt.df)]<- 0.001 # show something even if none
-mm10.IAP.red.cnt.plt.df[mm10.IAP.red.cnt.plt.df$N < 0.001] <- 0.001
-mm10.IAP.red.cnt.plt.df$reduced.structure <- gsub("\\|", " || ", gsub("IAP-?", "", mm10.IAP.red.cnt.plt.df$reduced.structure))
-mm10.IAP.red.cnt.plt.df$reduced.structure <- factor(mm10.IAP.red.cnt.plt.df$reduced.structure, levels=unique(mm10.IAP.red.cnt.plt.df$reduced.structure))
-
-structs.to.keep.no_fp <-mm10.IAP.red.cnt.plt.df %>%
-    filter(set != "False Positive" & set != "Genome") %>%
-    group_by(reduced.structure) %>% 
-    filter(max(N) > 0.001) %>%
-    dplyr::select(reduced.structure) %>%
-  distinct() %>%
-  pull(reduced.structure)
-
-mm10.IAP.red.cnt.no_fp.plt.df <- mm10.IAP.red.cnt.plt.df %>%
-  filter(set != "False Positive" & reduced.structure %in% structs.to.keep.no_fp)
-
-mm10.IAP.red.cnt.plt.df$shading <- rep_len(rep(c("A", "B"), each=4), nrow(mm10.IAP.red.cnt.plt.df))
-
-mm10.IAP.bas.cnt.plt.df <- cbind(mm10.IAP.basic.counts.norm, order=1:nrow(mm10.IAP.basic.counts.norm)) %>% filter(!is.na(`True ME`) | !is.na(`False Positive` | !is.na(`Tissue-Specific`))) %>%
-  melt(id.vars=c("basic.structure", "order"), variable.name="set", value.name="N") %>%
-  arrange(desc(order))
-mm10.IAP.bas.cnt.plt.df[is.na(mm10.IAP.bas.cnt.plt.df)]<- 0.001 # show something even if none
-mm10.IAP.bas.cnt.plt.df$basic.structure <- gsub("\\|", " || ", gsub("IAP-?", "", mm10.IAP.bas.cnt.plt.df$basic.structure))
-mm10.IAP.bas.cnt.plt.df$basic.structure <- factor(mm10.IAP.bas.cnt.plt.df$basic.structure, levels=unique(mm10.IAP.bas.cnt.plt.df$basic.structure))
-
-ggplot(mm10.IAP.red.cnt.no_fp.plt.df, aes(x=reduced.structure)) +
-    geom_bar(aes(y=N, fill=forcats::fct_rev(set)), stat="identity", position="dodge") +
-    #geom_ribbon(aes(ymin = -Inf, ymax = Inf, fill = shading, group = shading), alpha = .2) +
-    coord_flip() + theme_bw(base_size=14) +
-  ylab("Relative frequency of element structure") + xlab("Element structure") +
-  theme(panel.grid.major.y = element_blank(), axis.text.y = element_text(face="bold")) +
-  scale_y_continuous(expand=c(0, 0.01)) +
-  scale_fill_discrete(guide=guide_legend(reverse=TRUE, title=NULL)) +
-  facet_wrap(vars(class), ncol=1, scales = "free") +
-  ggtitle("Distribution of IAP element structure")
-
-ggplot(mm10.IAP.bas.cnt.plt.df, aes(x=basic.structure)) +
-    geom_bar(aes(y=N, fill=forcats::fct_rev(set)), stat="identity", position="dodge") +
-    coord_flip() + theme_bw() +
-  ylab("Relative frequency of element structure") + xlab("Element structure") +
-  theme(panel.grid.major.y = element_blank(), axis.text.y = element_text(face="bold")) +
-  scale_y_continuous(expand=c(0, 0.01)) +
-  scale_fill_discrete(guide=guide_legend(reverse=TRUE, title=NULL)) +
-  ggtitle("Distribution of IAP element structure")
+mending.summary %>%
+	group_by(Classification) %>%
+	summarize(Old=sum(Old), New=sum(New)) %>%
+	mutate(Old=sprintf("%.1f%%", 100 * Old / sum(Old)),
+				 New=sprintf("%.1f%%", 100 * New / sum(New))) %>% 
+	arrange(desc(Classification)) %>%
+	knitr::kable() %>%
+	kable_styling() 
 ```
 
