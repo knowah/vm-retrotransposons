@@ -11,7 +11,7 @@
 
 <meta name="author" content="Noah Kessler" />
 
-<meta name="date" content="2020-06-11" />
+<meta name="date" content="2020-07-14" />
 
 <title>Structure of murine IAP elements</title>
 
@@ -393,7 +393,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Structure of murine IAP elements</h1>
 <h4 class="author">Noah Kessler</h4>
-<h4 class="date">2020-06-11</h4>
+<h4 class="date">2020-07-14</h4>
 
 </div>
 
@@ -418,7 +418,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-06-11
+<strong>Last updated:</strong> 2020-07-14
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
@@ -521,16 +521,16 @@ refine.IAP.structure
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong266fbd9"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 266fbd9 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongb98ccbe"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> b98ccbe </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong266fbd9" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongb98ccbe" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 266fbd9. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version b98ccbe. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -538,11 +538,12 @@ Note that you need to be careful to ensure that all relevant files for the analy
 <pre><code>
 Ignored files:
     Ignored:    analysis/01.IAP_Annotations_cache/
+    Ignored:    analysis/02.Screen_for_VM_IAP_cache/
 
 Untracked files:
     Untracked:  01.IAP_Annotations.Rmd
     Untracked:  __pycache__/
-    Untracked:  analysis/02.Screen_for_VM_IAP.Rmd
+    Untracked:  analysis/03.IAP_Structure.Rmd
     Untracked:  code/CTCFChIPatVM-IAPs_narrowpeak.sh
     Untracked:  code/CTCFChIPatVM-IAPs_pvalueRelax_narrowpeak.sh
     Untracked:  code/CTCF_Analysis.Rmd
@@ -550,7 +551,9 @@ Untracked files:
     Untracked:  code/CpGdensity_VM-IAPs.R
     Untracked:  code/combine_8Indiv_CTCFChIP.r
     Untracked:  code/combine_8Indiv_CTCFChIP_pvalueRelax.r
+    Untracked:  code/data_functions.R
     Untracked:  code/demultiplex4C_5indiv.sh
+    Untracked:  code/genomics_functions.R
     Untracked:  code/heatmaps_NJK.R
     Untracked:  code/map.commands_cp.sh
     Untracked:  code/mergeBam
@@ -563,9 +566,11 @@ Untracked files:
     Untracked:  data/R_objects/
     Untracked:  data/misc/Schema_for_rmskOutCurrent.html
     Untracked:  data/repeat_annotations/
-    Untracked:  utils/
+    Untracked:  data/validation/
+    Untracked:  unsorted.Rmd
 
 Unstaged changes:
+    Modified:   README.md
     Deleted:    data/misc/example_broken_IAP.PNG
 
 </code></pre>
@@ -605,6 +610,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+b98ccbe
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-07-14
+</td>
+<td>
+Added old vs new comparison tables to the end
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+d3ce82d
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-06-11
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -884,6 +923,7 @@ colnames(mm10.IAP) &lt;- c(&quot;chrom&quot;, &quot;start&quot;, &quot;end&quot;
 mm10.IAP.gr &lt;- with(mm10.IAP, GRanges(chrom, IRanges(start, end), strand=strand))
 mcols(mm10.IAP.gr) &lt;- mm10.IAP[,-c(1:4)]</code></pre>
 <p>After these steps, there are 30567 IAP (sub)element entries, representing 13065 IAP elements. These elements are made up of 49 IAP subelement types: <em>IAPLTR1a_Mm, IAPEY2_LTR, IAPEy-int, IAPEY3_LTR, IAPLTR2b, IAPLTR2_Mm, IAPEz-int, IAPEY4_I-int, IAP-d-int, IAPEY3-int, RLTR10B2, IAP1-MM_I-int, IAP1-MM_LTR, IAPLTR2a2_Mm, IAPLTR4, IAPLTR1_Mm, IAPEY3C_LTR, IAPLTR4_I, IAPLTR3, IAPLTR3-int, RLTR10-int, RLTR10F, IAPLTR2a, IAPEY5_LTR, IAPEY5_I-int, RLTR10D, IAPEY_LTR, RMER6C, MMERVK10C-int, IAPEY4_LTR, RLTR10A, RLTR10C, RLTR46A, ETnERV3-int, ETnERV-int, RLTR10, IAPA_MM-int, RLTR10E, RLTR46A2, ERVB4_3-LTR_MM, RLTR27, RLTR46B, RLTR10B, RLTR46, RLTR10D2, RLTR9A3, LTR10_RN, RMER17C, RMER16-int</em>.</p>
+<p><strong>NB: In the following analyses, element names are missing the ‘IAP’ prefix for brevity.</strong></p>
 <p>Within an IAP, the subelements may be missing components (relative to their full-length reference), or be broken up by other retroelements that have inserted themselves within the element. Note that many of the subelements which appear multiple times in the same IAP are often actually fragmented parts of a full subelement.</p>
 </div>
 </div>
@@ -907,7 +947,7 @@ mm10.IAP.reduced &lt;- mm10.IAP.gr %&gt;% as.data.frame() %&gt;%
   summarize(reduced.structure=get.reduced.structure(strand, repName))
 
 mm10.IAP.reduced.counts &lt;- count.df(mm10.IAP.reduced, &quot;reduced.structure&quot;, &quot;Genome&quot;)</code></pre>
-<p>A faster and more digestible solution was to simply ‘collapse’ adjacent subelements of the same type into a single subelement of that type (e.g., <code>IAPLTR1a_Mm || IAPEz-int || IAPEz-int || IAPLTR1a_Mm</code> becomes <code>IAPLTR1a_Mm || IAPEz-int || IAPLTR1a_Mm</code>). This results in 203 unique IAP element structures, shown below with their frequency in the genome:</p>
+<p>A faster and more digestible solution was to simply ‘collapse’ adjacent subelements of the same type into a single subelement of that type (e.g., <code>LTR1a_Mm || Ez-int || Ez-int || LTR1a_Mm</code> becomes <code>LTR1a_Mm || Ez-int || LTR1a_Mm</code>). This results in 203 unique IAP element structures, shown below with their frequency in the genome:</p>
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:240px; ">
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
@@ -2548,7 +2588,6 @@ RMER6C || EY3-int
 </tbody>
 </table>
 </div>
-<p><em>NB: In the list above and plot below, element names are missing the ‘IAP’ prefix for brevity.</em></p>
 </div>
 <div id="fixing-fragmented-iaps" class="section level1">
 <h1>Fixing fragmented IAPs</h1>
@@ -2708,11 +2747,12 @@ for (inc.elem in incomplete.elements) {
 mm10.IAP.mended &lt;- distinct(
   as.data.frame(mcols(mm10.IAP.gr)[,c(&quot;orig.element.ID&quot;, &quot;element.ID&quot;)])
 )</code></pre>
-<p>This process resulted in 2387 elements being combined with other elements, and increased the number of fully-structured IAPs from 2740 to 3858. An example of the mended vs old (RepeatMasker) annotation is shown below:</p>
+<p>This process resulted in 2387 elements being combined with other elements, and increased the number of fully-structured IAPs from 2740 to 2740. In total, there are now 13065 IAP elements. An example of the mended vs old (RepeatMasker) annotation is shown below:</p>
 <pre class="r"><code>plot.elem &lt;- function(elem.id) {
   elem.df &lt;- mm10.IAP.gr[mm10.IAP.gr$element.ID %in% elem.id | mm10.IAP.gr$orig.element.ID %in% elem.id] %&gt;% as.data.frame()
-  elem.df$IAP.type &lt;- sapply(as.character(elem.df$repName), function(x) c(&quot;LTR&quot;, &quot;internal&quot;)[
-    1+as.numeric(grepl(&quot;.*[-int|_I]$&quot;,strsplit(x, &quot;\\|&quot;)[[1]]))
+  elem.df$IAP.type &lt;- sapply(as.character(elem.df$repName),
+    function(x) c(&quot;LTR&quot;, &quot;internal&quot;)[
+      1+as.numeric(grepl(&quot;.*[-int|_I]$&quot;,strsplit(x, &quot;\\|&quot;)[[1]]))
     ])
   N.elements &lt;- nrow(elem.df)
   elem.df &lt;- rbind(elem.df, elem.df)
@@ -2794,188 +2834,250 @@ mm10.IAP.gr[(mm10.IAP.gr %&gt;% as.data.frame() %&gt;%
 mcols(mm10.IAP.gr)[strand(mm10.IAP.gr)==&#39;-&#39;, c(&quot;first.subelement&quot;, &quot;last.subelement&quot;)] &lt;- mcols(mm10.IAP.gr)[strand(mm10.IAP.gr)==&#39;-&#39;, c(&quot;last.subelement&quot;, &quot;first.subelement&quot;)]
 
 mm10.IAP.gr$is.LTR &lt;- !grepl(&quot;.*[-int|_I]$&quot;, mm10.IAP.gr$repName)
-saveRDS(mm10.IAP.gr, file.path(&quot;data&quot;, &quot;R_objects&quot;, &quot;mm10.IAP.gr.RDS&quot;))</code></pre>
-</div>
-<div id="structure-of-mes" class="section level1">
-<h1>Structure of MEs</h1>
-<p>What kind of IAP element structure do we see at MEs? How does this compare with the whole genome and with false positives?</p>
-<p>** Need to run next section; maybe in new file? either way absolute paths need to be fixed, and interpretation below checked **</p>
-<pre class="r"><code>mm10.IAP.top_name.structure &lt;- mm10.IAP.gr %&gt;% as.data.frame() %&gt;%
-  dplyr::select(element.ID, repName, is.LTR, width) %&gt;%
-  group_by(element.ID, is.LTR, repName) %&gt;%
-  summarize(total.bp=sum(width)) %&gt;%
-  group_by(element.ID, is.LTR) %&gt;%
-  filter(1:n()==1) %&gt;% 
-  ungroup() %&gt;% # test
-  arrange(element.ID, !is.LTR) %&gt;%
-  group_by(element.ID) %&gt;%
-  summarize(top.names=paste(repName, collapse=&quot; – &quot;))
+saveRDS(mm10.IAP.gr, file.path(&quot;data&quot;, &quot;R_objects&quot;, &quot;mm10.IAP.gr.RDS&quot;))
+saveRDS(mm10.IAP.reduced, file.path(&quot;data&quot;, &quot;R_objects&quot;, &quot;mm10.IAP.reduced.RDS&quot;))</code></pre>
+<p>A breakdown of the change in IAP element structures is shown below.</p>
+<pre class="r"><code>mending.summary &lt;- rbind(
+    mm10.IAP.reduced.old %&gt;%
+        group_by(solo.LTR, fully.structured, basic.structure) %&gt;%
+        summarize(N=n()) %&gt;%
+        mutate(Which=&quot;Old&quot;),
+    mm10.IAP.reduced %&gt;%
+        group_by(solo.LTR, fully.structured, basic.structure) %&gt;%
+        summarize(N=n()) %&gt;%
+        mutate(Which=&quot;New&quot;)
+) %&gt;%
+    ungroup() %&gt;%
+    pivot_wider(values_from=&quot;N&quot;, names_from=&quot;Which&quot;, values_fill=list(&quot;N&quot;=0)) %&gt;%
+    arrange(desc(solo.LTR), desc(fully.structured), basic.structure) %&gt;%
+    mutate(
+        Classification=
+            ifelse(solo.LTR, &quot;Solo LTR&quot;,
+            ifelse(fully.structured, &quot;Fully-structured&quot;,
+                &quot;Fragmented&quot;
+    ))) %&gt;%
+    dplyr::select(Classification, Structure=basic.structure, Old, New)
 
-mm10.IAP.reduced &lt;- left_join(mm10.IAP.reduced, mm10.IAP.top_name.structure, by=&quot;element.ID&quot;)
-mm10.IAP.reduced$optimal.structure &lt;- with(mm10.IAP.reduced,
-                                      ifelse(solo.LTR | fully.structured,
-                                             top.names,
-                                             reduced.structure))
-
-
-
-ME.validation &lt;- read.table(&quot;/data/reference/ME/IAP_validation.July2019.tsv&quot;, sep=&quot;\t&quot;, header=TRUE, stringsAsFactors=FALSE)
-ME.validation.gr &lt;- unlist(as(lapply(ME.validation$Coordinates, ucsc2gr), &quot;GRangesList&quot;))
-ME.validation.gr$Category &lt;- ME.validation$Category
-
-element_ID.ME &lt;- unique(subsetByOverlaps(mm10.IAP.gr, ME.validation.gr[ME.validation.gr$Category==&quot;True ME&quot;])$element.ID)
-element_ID.TS &lt;- unique(subsetByOverlaps(mm10.IAP.gr, ME.validation.gr[ME.validation.gr$Category==&quot;Tissue-specific&quot;])$element.ID)
-#FIX ME
-element_ID.TS &lt;- setdiff(element_ID.TS, 3514893)
-element_ID.FP &lt;- unique(subsetByOverlaps(mm10.IAP.gr, ME.validation.gr[ME.validation.gr$Category==&quot;False-positive&quot;])$element.ID)
-
-
-mm10.IAP.optimal.counts &lt;- count.df(mm10.IAP.reduced, &quot;optimal.structure&quot;, &quot;Genome&quot;)
-mm10.IAP.optimal.counts &lt;- left_join(mm10.IAP.optimal.counts, mm10.IAP.reduced[,c(&quot;optimal.structure&quot;, &quot;basic.structure&quot;)] %&gt;% distinct, by=&quot;optimal.structure&quot;)
-
-mm10.IAP.optimal.counts$elem.class &lt;- &quot;Broken&quot;
-mm10.IAP.optimal.counts[mm10.IAP.optimal.counts$basic.structure ==&quot;LTR&quot;,]$elem.class &lt;- &quot;Solo LTR&quot;
-mm10.IAP.optimal.counts[grepl(&quot;^LTR-.*-LTR$&quot;,mm10.IAP.optimal.counts$basic.structure),]$elem.class &lt;- &quot;Fully-structured&quot;
-
-mm10.IAP.optimal.counts$elem.class.2 &lt;- &quot;Solo LTR&quot;
-mm10.IAP.optimal.counts[mm10.IAP.optimal.counts$elem.class!=&quot;Solo LTR&quot;,]$elem.class.2 &lt;- &quot;Fully-structured or Incomplete&quot;
-                                     
-mm10.IAP.optimal.counts &lt;- left_join(mm10.IAP.optimal.counts,
-                                     count.df(mm10.IAP.reduced %&gt;% filter(element.ID %in% element_ID.ME), &quot;optimal.structure&quot;, &quot;Constitutive ME&quot;))
-mm10.IAP.optimal.counts &lt;- left_join(mm10.IAP.optimal.counts,
-                                     count.df(mm10.IAP.reduced %&gt;% filter(element.ID %in% element_ID.TS), &quot;optimal.structure&quot;, &quot;Tissue-Specific&quot;))
-
-mm10.IAP.optimal.counts &lt;- mm10.IAP.optimal.counts %&gt;% arrange(desc(Genome))
-
-mm10.IAP.optimal.counts.norm &lt;- mm10.IAP.optimal.counts %&gt;%
-  mutate_if(is.numeric, function(x) x / max(x, na.rm=TRUE))
-mm10.IAP.opt.cnt.plt.df &lt;- mm10.IAP.optimal.counts.norm %&gt;%
-  mutate(order=1:n()) %&gt;%
-  filter(!is.na(`Constitutive ME`) | !is.na(`Tissue-Specific`)) %&gt;%
-  melt(id.vars=c(&quot;optimal.structure&quot;, &quot;order&quot;, &quot;basic.structure&quot;, &quot;elem.class&quot;, &quot;elem.class.2&quot;), variable.name=&quot;set&quot;, value.name=&quot;N&quot;) %&gt;%
-  arrange(desc(order))
-
-mm10.IAP.opt.cnt.plt.df[is.na(mm10.IAP.opt.cnt.plt.df)]&lt;- 0.001 # show something even if none
-mm10.IAP.opt.cnt.plt.df[mm10.IAP.opt.cnt.plt.df$N &lt; 0.001] &lt;- 0.001
-mm10.IAP.opt.cnt.plt.df$optimal.structure &lt;- gsub(&quot;\\|&quot;, &quot; || &quot;, gsub(&quot;IAP-?&quot;, &quot;&quot;, mm10.IAP.opt.cnt.plt.df$optimal.structure))
-mm10.IAP.opt.cnt.plt.df$optimal.structure &lt;- factor(mm10.IAP.opt.cnt.plt.df$optimal.structure, levels=unique(mm10.IAP.opt.cnt.plt.df$optimal.structure))
-
-group.colors &lt;- c(Genome = &quot;#444444&quot;, `Constitutive ME` = &quot;#1b9e77&quot;, `Tissue-Specific` = &quot;#d95f02&quot;)
-
-ggplot(mm10.IAP.opt.cnt.plt.df, aes(x=optimal.structure)) +
-  geom_bar(aes(y=N, fill=forcats::fct_rev(set)), stat=&quot;identity&quot;, position=&quot;dodge&quot;) +
-  coord_flip() + theme_bw(base_size=14) +
-  ylab(&quot;Relative frequency of element structure&quot;) + xlab(NULL) +
-  theme(panel.grid.major.y = element_blank(), axis.text.y = element_text(face=&quot;bold&quot;)) +
-  scale_y_continuous(expand=c(0, 0.01)) +
-  scale_fill_manual(guide=guide_legend(reverse=TRUE, title=NULL), values=group.colors) +
-  facet_grid(vars(elem.class.2),  scales = &quot;free_y&quot;, space=&quot;free_y&quot;) #+
-  #ggtitle(&quot;Distribution of IAP element structure&quot;)
-
-### for pub
-ggplot(mm10.IAP.opt.cnt.plt.df, aes(x=optimal.structure)) +
-  geom_bar(aes(y=N, fill=forcats::fct_rev(set)), stat=&quot;identity&quot;, position=&quot;dodge&quot;) +
-  coord_flip() + theme_bw(base_size=22) +
-  ylab(&quot;Relative frequency of element structure&quot;) + xlab(NULL) +
-  theme(panel.grid.major.y = element_blank(),
-        axis.text.y = element_text(face=&quot;bold&quot;, size=16),
-        axis.ticks.y = element_line(color=&quot;black&quot;, size=10),
-        axis.ticks.length.y = unit(0.03, &quot;cm&quot;),
-        legend.position = c(0.825, 0.075),
-        legend.background=element_rect(color=&quot;black&quot;),
-        legend.title=element_blank(),
-        legend.margin=margin(0, 0.25, 0.25, 0.2, unit=&#39;cm&#39;)) +
-  scale_y_continuous(expand=c(0, 0.01)) +
-  scale_fill_manual(guide=guide_legend(reverse=TRUE), values=group.colors) +
-  facet_grid(vars(elem.class.2),  scales = &quot;free_y&quot;, space=&quot;free_y&quot;) #+
-###
-
-
-
-
-
-
-
-
-
-
-mm10.IAP.reduced.counts &lt;- left_join(mm10.IAP.reduced.counts, mm10.IAP.reduced[,c(&quot;reduced.structure&quot;, &quot;basic.structure&quot;)] %&gt;% distinct,
-                                     by=&quot;reduced.structure&quot;)
-
-mm10.IAP.reduced.counts$class &lt;- &quot;Broken&quot;
-mm10.IAP.reduced.counts[mm10.IAP.reduced.counts$basic.structure ==&quot;LTR&quot;,]$class &lt;- &quot;Solo LTR&quot;
-mm10.IAP.reduced.counts[grepl(&quot;^LTR-.*-LTR$&quot;,mm10.IAP.reduced.counts$basic.structure),]$class &lt;- &quot;Fully-structured&quot;
-
-mm10.IAP.reduced.counts &lt;- left_join(mm10.IAP.reduced.counts,
-                                     count.df(mm10.IAP.reduced %&gt;% filter(element.ID %in% element_ID.ME), &quot;reduced.structure&quot;, &quot;True ME&quot;))
-mm10.IAP.basic.counts &lt;- left_join(mm10.IAP.basic.counts,
-                                     count.df(mm10.IAP.reduced %&gt;% filter(element.ID %in% element_ID.ME), &quot;basic.structure&quot;, &quot;True ME&quot;))
-mm10.IAP.reduced.counts &lt;- left_join(mm10.IAP.reduced.counts,
-                                     count.df(mm10.IAP.reduced %&gt;% filter(element.ID %in% element_ID.TS), &quot;reduced.structure&quot;, &quot;Tissue-Specific&quot;))
-mm10.IAP.basic.counts &lt;- left_join(mm10.IAP.basic.counts,
-                                     count.df(mm10.IAP.reduced %&gt;% filter(element.ID %in% element_ID.TS), &quot;basic.structure&quot;, &quot;Tissue-Specific&quot;))
-mm10.IAP.reduced.counts &lt;- left_join(mm10.IAP.reduced.counts,
-                                     count.df(mm10.IAP.reduced %&gt;% filter(element.ID %in% element_ID.FP), &quot;reduced.structure&quot;, &quot;False Positive&quot;))
-mm10.IAP.basic.counts &lt;- left_join(mm10.IAP.basic.counts,
-                                     count.df(mm10.IAP.reduced %&gt;% filter(element.ID %in% element_ID.FP), &quot;basic.structure&quot;, &quot;False Positive&quot;))
-
-mm10.IAP.reduced.counts &lt;- mm10.IAP.reduced.counts %&gt;% arrange(desc(Genome))
-mm10.IAP.basic.counts &lt;- mm10.IAP.basic.counts %&gt;% arrange(desc(Genome))
-
-mm10.IAP.reduced.counts.norm &lt;- mm10.IAP.reduced.counts %&gt;%
-  mutate_if(is.numeric, function(x) x / max(x, na.rm=TRUE))
-mm10.IAP.basic.counts.norm &lt;- mm10.IAP.basic.counts %&gt;%
-  mutate_if(is.numeric, function(x) x / max(x, na.rm=TRUE))
-
-mm10.IAP.red.cnt.plt.df &lt;- mm10.IAP.reduced.counts.norm %&gt;%
-  mutate(order=1:n()) %&gt;%
-  filter(!is.na(`True ME`) | !is.na(`False Positive` | !is.na(`Tissue-Specific`))) %&gt;%
-  melt(id.vars=c(&quot;reduced.structure&quot;, &quot;order&quot;, &quot;basic.structure&quot;, &quot;class&quot;), variable.name=&quot;set&quot;, value.name=&quot;N&quot;) %&gt;%
-  arrange(desc(order))
-mm10.IAP.red.cnt.plt.df[is.na(mm10.IAP.red.cnt.plt.df)]&lt;- 0.001 # show something even if none
-mm10.IAP.red.cnt.plt.df[mm10.IAP.red.cnt.plt.df$N &lt; 0.001] &lt;- 0.001
-mm10.IAP.red.cnt.plt.df$reduced.structure &lt;- gsub(&quot;\\|&quot;, &quot; || &quot;, gsub(&quot;IAP-?&quot;, &quot;&quot;, mm10.IAP.red.cnt.plt.df$reduced.structure))
-mm10.IAP.red.cnt.plt.df$reduced.structure &lt;- factor(mm10.IAP.red.cnt.plt.df$reduced.structure, levels=unique(mm10.IAP.red.cnt.plt.df$reduced.structure))
-
-structs.to.keep.no_fp &lt;-mm10.IAP.red.cnt.plt.df %&gt;%
-    filter(set != &quot;False Positive&quot; &amp; set != &quot;Genome&quot;) %&gt;%
-    group_by(reduced.structure) %&gt;% 
-    filter(max(N) &gt; 0.001) %&gt;%
-    dplyr::select(reduced.structure) %&gt;%
-  distinct() %&gt;%
-  pull(reduced.structure)
-
-mm10.IAP.red.cnt.no_fp.plt.df &lt;- mm10.IAP.red.cnt.plt.df %&gt;%
-  filter(set != &quot;False Positive&quot; &amp; reduced.structure %in% structs.to.keep.no_fp)
-
-mm10.IAP.red.cnt.plt.df$shading &lt;- rep_len(rep(c(&quot;A&quot;, &quot;B&quot;), each=4), nrow(mm10.IAP.red.cnt.plt.df))
-
-mm10.IAP.bas.cnt.plt.df &lt;- cbind(mm10.IAP.basic.counts.norm, order=1:nrow(mm10.IAP.basic.counts.norm)) %&gt;% filter(!is.na(`True ME`) | !is.na(`False Positive` | !is.na(`Tissue-Specific`))) %&gt;%
-  melt(id.vars=c(&quot;basic.structure&quot;, &quot;order&quot;), variable.name=&quot;set&quot;, value.name=&quot;N&quot;) %&gt;%
-  arrange(desc(order))
-mm10.IAP.bas.cnt.plt.df[is.na(mm10.IAP.bas.cnt.plt.df)]&lt;- 0.001 # show something even if none
-mm10.IAP.bas.cnt.plt.df$basic.structure &lt;- gsub(&quot;\\|&quot;, &quot; || &quot;, gsub(&quot;IAP-?&quot;, &quot;&quot;, mm10.IAP.bas.cnt.plt.df$basic.structure))
-mm10.IAP.bas.cnt.plt.df$basic.structure &lt;- factor(mm10.IAP.bas.cnt.plt.df$basic.structure, levels=unique(mm10.IAP.bas.cnt.plt.df$basic.structure))
-
-ggplot(mm10.IAP.red.cnt.no_fp.plt.df, aes(x=reduced.structure)) +
-    geom_bar(aes(y=N, fill=forcats::fct_rev(set)), stat=&quot;identity&quot;, position=&quot;dodge&quot;) +
-    #geom_ribbon(aes(ymin = -Inf, ymax = Inf, fill = shading, group = shading), alpha = .2) +
-    coord_flip() + theme_bw(base_size=14) +
-  ylab(&quot;Relative frequency of element structure&quot;) + xlab(&quot;Element structure&quot;) +
-  theme(panel.grid.major.y = element_blank(), axis.text.y = element_text(face=&quot;bold&quot;)) +
-  scale_y_continuous(expand=c(0, 0.01)) +
-  scale_fill_discrete(guide=guide_legend(reverse=TRUE, title=NULL)) +
-  facet_wrap(vars(class), ncol=1, scales = &quot;free&quot;) +
-  ggtitle(&quot;Distribution of IAP element structure&quot;)
-
-ggplot(mm10.IAP.bas.cnt.plt.df, aes(x=basic.structure)) +
-    geom_bar(aes(y=N, fill=forcats::fct_rev(set)), stat=&quot;identity&quot;, position=&quot;dodge&quot;) +
-    coord_flip() + theme_bw() +
-  ylab(&quot;Relative frequency of element structure&quot;) + xlab(&quot;Element structure&quot;) +
-  theme(panel.grid.major.y = element_blank(), axis.text.y = element_text(face=&quot;bold&quot;)) +
-  scale_y_continuous(expand=c(0, 0.01)) +
-  scale_fill_discrete(guide=guide_legend(reverse=TRUE, title=NULL)) +
-  ggtitle(&quot;Distribution of IAP element structure&quot;)</code></pre>
+knitr::kable(mending.summary) %&gt;%
+    kable_styling() </code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Classification
+</th>
+<th style="text-align:left;">
+Structure
+</th>
+<th style="text-align:right;">
+Old
+</th>
+<th style="text-align:right;">
+New
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Solo LTR
+</td>
+<td style="text-align:left;">
+LTR
+</td>
+<td style="text-align:right;">
+5578
+</td>
+<td style="text-align:right;">
+5578
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fully-structured
+</td>
+<td style="text-align:left;">
+LTR-internal-LTR
+</td>
+<td style="text-align:right;">
+2733
+</td>
+<td style="text-align:right;">
+2733
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fully-structured
+</td>
+<td style="text-align:left;">
+LTR-internal-LTR-internal-LTR
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fully-structured
+</td>
+<td style="text-align:left;">
+LTR-internal-LTR-internal-LTR-internal-LTR-internal-LTR
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fragmented
+</td>
+<td style="text-align:left;">
+internal
+</td>
+<td style="text-align:right;">
+1806
+</td>
+<td style="text-align:right;">
+1806
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fragmented
+</td>
+<td style="text-align:left;">
+internal-LTR
+</td>
+<td style="text-align:right;">
+1357
+</td>
+<td style="text-align:right;">
+1357
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fragmented
+</td>
+<td style="text-align:left;">
+internal-LTR-internal
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+16
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fragmented
+</td>
+<td style="text-align:left;">
+internal-LTR-internal-LTR
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fragmented
+</td>
+<td style="text-align:left;">
+LTR-internal
+</td>
+<td style="text-align:right;">
+1560
+</td>
+<td style="text-align:right;">
+1560
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fragmented
+</td>
+<td style="text-align:left;">
+LTR-internal-LTR-internal
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>mending.summary %&gt;%
+    group_by(Classification) %&gt;%
+    summarize(Old=sum(Old), New=sum(New)) %&gt;%
+    mutate(Old=sprintf(&quot;%.1f%%&quot;, 100 * Old / sum(Old)),
+                 New=sprintf(&quot;%.1f%%&quot;, 100 * New / sum(New))) %&gt;% 
+    arrange(desc(Classification)) %&gt;%
+    knitr::kable() %&gt;%
+    kable_styling() </code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Classification
+</th>
+<th style="text-align:left;">
+Old
+</th>
+<th style="text-align:left;">
+New
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Solo LTR
+</td>
+<td style="text-align:left;">
+42.7%
+</td>
+<td style="text-align:left;">
+42.7%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fully-structured
+</td>
+<td style="text-align:left;">
+21.0%
+</td>
+<td style="text-align:left;">
+21.0%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fragmented
+</td>
+<td style="text-align:left;">
+36.3%
+</td>
+<td style="text-align:left;">
+36.3%
+</td>
+</tr>
+</tbody>
+</table>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
