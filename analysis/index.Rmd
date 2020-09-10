@@ -16,7 +16,7 @@ This project is an update, an improvement, and an expansion on [Kazachenka & Ber
 
 # Analyses
 
-## IAP Annotations
+## IAP annotations
 
 This analysis helped fix issues with the RepeatMasker annotations of IAPs.
 See [01.IAP_Annotations.html](01.IAP_Annotations.html).
@@ -26,7 +26,22 @@ See [01.IAP_Annotations.html](01.IAP_Annotations.html).
 An update of the screen for VM-IAPs, similar to that performed in Kazachenka & Bertozzi _et al_., using the improved reference and with some improvements in implementation.
 See [02.Screen_for_VM_IAP.html](02.Screen_for_VM_IAP.html).
 
-## Validations and tsVM-IAPs
+## Structure of IAPs
+
+An overview of how IAPs are structured in terms of type (e.g. IAPLTR1a_Mm) and completeness (solo vs. incomplete/full), as well as a look into how the IAP LTRs are structured in terms of their U5, R, and U3 components.
+See [03.IAP_Structure.html](03.IAP_Structure.html).
+
+## IAP sequence
+
+Using _k_-mer analysis, specific sequences enriched in the VM-IAPs are identified.
+See [04.IAP_sequence.html](04.IAP_Sequence.html).
+
+## CTCF binding
+
+An analysis of CTCF motifs and ChIP-seq data at IAPs, and how c/tsVM-IAPs differ from the rest of the IAPs.
+See [05.CTCF_at_IAPs.html](05.CTCF_at_IAPs.html).
+
+## Methylation patterns beyond IAP boundaries
 
 Analyses to be added.
 
@@ -34,6 +49,3 @@ Analyses to be added.
 
 Analyses to be added.
 
-## CTCF binding
-
-Analyses to be added.
