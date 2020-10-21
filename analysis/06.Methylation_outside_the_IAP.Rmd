@@ -234,6 +234,9 @@ cVMIAP.methy <- lapply(
 	) %>%
 	dplyr::select(-mC, -umC)
 	
+```
+
+```{r make.plot, fig.width=8, fig.height=20, fig.align='center'}
 
 methy_outside_IAP_plot <- cVMIAP.methy %>%
 	filter(
