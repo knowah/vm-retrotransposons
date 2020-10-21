@@ -34,7 +34,7 @@ See [03.IAP_Structure.html](03.IAP_Structure.html).
 ## IAP sequence
 
 Using _k_-mer analysis, specific sequences enriched in the VM-IAPs are identified.
-See [04.IAP_sequence.html](04.IAP_Sequence.html).
+See [04.IAP_Sequence.html](04.IAP_Sequence.html).
 
 ## CTCF binding
 
@@ -43,9 +43,17 @@ See [05.CTCF_at_IAPs.html](05.CTCF_at_IAPs.html).
 
 ## Methylation patterns beyond IAP boundaries
 
-Analyses to be added.
+We analysed whether there are any common methylation signatures in the regions flanking VM-IAPs, and found that there is little in common among the elements.
+See [06.Methylation_outside_the_IAP.html](06.Methylation_outside_the_IAP.html).
+
+## Genomic interactions with IAPs
+
+4C-seq was performed on five IAPs (four VM-IAPs and one control hypermethylated IAP).
+We found that the VM-IAPs with low methylation levels had more varied interactions with nearby genomic regions compared with the highly-methylated VM-IAPs.
+See [07.Genomic_Interactions_with_IAPs.html](07.Genomic_Interactions_with_IAPs.html).
 
 ## Expansion of screen to other repeat classes
 
-Analyses to be added.
+We sought to determine whether variable methylation is mostly an IAP-specific phenomemon, and found that LINEs, SINEs, and non-ERV LTRs are depleted for variably-methylated elements.
+See [08.Screen_for_non_IAP_VM.html](08.Screen_for_non_IAP_VM.html).
 
