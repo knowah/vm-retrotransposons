@@ -11,7 +11,7 @@
 
 <meta name="author" content="Noah Kessler" />
 
-<meta name="date" content="2020-07-13" />
+<meta name="date" content="2020-10-21" />
 
 <title>Screen for VM-IAPs</title>
 
@@ -392,7 +392,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Screen for VM-IAPs</h1>
 <h4 class="author">Noah Kessler</h4>
-<h4 class="date">2020-07-13</h4>
+<h4 class="date">2020-10-21</h4>
 
 </div>
 
@@ -417,13 +417,13 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-07-13
+<strong>Last updated:</strong> 2020-10-21
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
 </p>
 <p>
-<strong>Knit directory:</strong> <code>Paper_VMIAP_2020/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+<strong>Knit directory:</strong> <code>vm-retrotransposons/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
 </p>
 <p>
 This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
@@ -514,39 +514,59 @@ load.IAP.reference
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongac7ca22"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> ac7ca22 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong0ca5179"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 0ca5179 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongac7ca22" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong0ca5179" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version ac7ca22. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 0ca5179. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 </p>
 <pre><code>
 Ignored files:
-    Ignored:    analysis/01.IAP_Annotations_cache/
     Ignored:    analysis/02.Screen_for_VM_IAP_cache/
 
 Untracked files:
     Untracked:  01.IAP_Annotations.Rmd
+    Untracked:  20200803.RData
+    Untracked:  FourC.plots.indiv.with_legend.pdf
+    Untracked:  Rplot.svg
+    Untracked:  SciAdv_ME_regions.tsv.txt
     Untracked:  __pycache__/
+    Untracked:  analysis/03.IAP_Structure.Rmd
+    Untracked:  analysis/04.IAP_Sequence.Rmd
+    Untracked:  analysis/05.CTCF_at_IAPs.Rmd
+    Untracked:  analysis/06.Methylation_outside_the_IAP.Rmd
+    Untracked:  analysis/07.Genomic_Interactions_with_IAPs.Rmd
+    Untracked:  analysis/08.Screen_for_non_IAP_VM.Rmd
+    Untracked:  code/4C_seq.R
     Untracked:  code/CTCFChIPatVM-IAPs_narrowpeak.sh
     Untracked:  code/CTCFChIPatVM-IAPs_pvalueRelax_narrowpeak.sh
     Untracked:  code/CTCF_Analysis.Rmd
+    Untracked:  code/CTCF_Analysis.nb.html
     Untracked:  code/CTCF_motif_in_IAP.Rmd
+    Untracked:  code/CTCF_motif_in_IAP.nb.html
     Untracked:  code/CpGdensity_VM-IAPs.R
+    Untracked:  code/LTR_components.R
+    Untracked:  code/TransposableElements.py
+    Untracked:  code/__pycache__/
+    Untracked:  code/align_and_save.sh
     Untracked:  code/combine_8Indiv_CTCFChIP.r
     Untracked:  code/combine_8Indiv_CTCFChIP_pvalueRelax.r
     Untracked:  code/data_functions.R
     Untracked:  code/demultiplex4C_5indiv.sh
+    Untracked:  code/element_metatype_boundaries.py
+    Untracked:  code/fix_RepeatMasker_breaks.py
     Untracked:  code/genomics_functions.R
     Untracked:  code/heatmaps_NJK.R
+    Untracked:  code/jellyfish_wrapper.py
+    Untracked:  code/kmer_alignment.py
     Untracked:  code/map.commands_cp.sh
     Untracked:  code/mergeBam
     Untracked:  code/normalize_log2.sh
@@ -555,15 +575,39 @@ Untracked files:
     Untracked:  code/plot_chip_in_iap.R
     Untracked:  code/run_fimo_top10percent.sh
     Untracked:  code/run_meme_top_10_percent.sh
+    Untracked:  data/4C-seq/
     Untracked:  data/R_objects/
+    Untracked:  data/chromHMM/
+    Untracked:  data/ctcf/
+    Untracked:  data/jellyfish/
+    Untracked:  data/kmer/
     Untracked:  data/misc/Schema_for_rmskOutCurrent.html
+    Untracked:  data/misc/mm10.chrom.sizes
     Untracked:  data/repeat_annotations/
     Untracked:  data/validation/
+    Untracked:  elems_meta.tsv
+    Untracked:  output/CTCF_ChIP.non_VM.pdf
+    Untracked:  output/CTCF_and_motif.NonVM.Full.pdf
+    Untracked:  output/CTCF_and_motif.NonVM.pdf
+    Untracked:  output/CTCF_and_motif.VM.pdf
+    Untracked:  output/CTCF_and_motif.all.a4.pdf
+    Untracked:  output/CTCF_heatmap_legend.pdf
+    Untracked:  output/CpG_density_plt.pdf
+    Untracked:  output/FourC.combo_plots.pdf
+    Untracked:  output/FourC.indiv_plots.pdf
+    Untracked:  output/Methylation_outside_cVMIAPs.pdf
+    Untracked:  output/Non_ERV.ranges2.background.png
+    Untracked:  output/Non_ERV.ranges2.foreground.pdf
+    Untracked:  output/Non_ERV.ranges2.foreground.svg
+    Untracked:  test.pdf
     Untracked:  unsorted.Rmd
+    Untracked:  vm-retrotransposons.Rproj
+    Untracked:  vm_erv.R
 
 Unstaged changes:
+    Deleted:    Paper_VMIAP_2020.Rproj
     Modified:   README.md
-    Modified:   analysis/01.IAP_Annotations.Rmd
+    Deleted:    analysis/fix_RepeatMasker_breaks.py
     Deleted:    data/misc/example_broken_IAP.PNG
 
 </code></pre>
@@ -603,6 +647,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+0ca5179
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-10-21
+</td>
+<td>
+wflow_publish(“analysis/02.Screen_for_VM_IAP.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+95f41a8
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-07-13
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -789,7 +867,7 @@ mm10.IAP.LTR.look_right &lt;- mm10.IAP.gr[with(mm10.IAP.gr,
 )]
 
 # load mm10 CpG locations
-mm10.CpG.gr &lt;- sortSeqlevels(readRDS(&quot;data/R_objects/mm10.CpG.gr.RDS&quot;))
+mm10.CpG.gr &lt;- sortSeqlevels(get.mm10.CpGs())
 mm10.CpG.gr &lt;- sort(mm10.CpG.gr) # should be sorted, but force anyway since it&#39;s needed
 
 # define relevant CpGs
@@ -811,28 +889,7 @@ colnames(mm10.IAP.LTR.CpGs)[1] &lt;- &quot;chrom&quot;
 mm10.IAP.df &lt;- mm10.IAP.gr %&gt;%
   as.data.frame() %&gt;%
   group_by(element.ID, seqnames, strand) %&gt;%
-  summarize(start=min(start), end=max(end))
-
-#mm10.IAP.LTR.adj.CpGs &lt;- rbind(
-#  index.r_join(mm10.IAP.LTR.look_left, CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_right, 0, TRUE)),
-#  index.r_join(mm10.IAP.LTR.look_right, CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_left, 0, FALSE))
-#) %&gt;%
-#  arrange(element.ID, side, CG.index) %&gt;%
-#  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
-#
-#mm10.IAP.LTR.adj.CpGs &lt;- rbind(
-#  index.r_join(
-#    mm10.IAP.LTR.look_left,
-#    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_right, 0, TRUE)
-#  ),
-#  index.r_join(
-#    mm10.IAP.LTR.look_right,
-#    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_left, 0, FALSE)
-#  )
-#) %&gt;%
-#  arrange(element.ID, side, CG.index) %&gt;%
-#  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
-#colnames(mm10.IAP.LTR.adj.CpGs)[1] &lt;- &quot;chrom&quot;</code></pre>
+  summarize(start=min(start), end=max(end))</code></pre>
 <p>The number of CpGs selected for these analyses is 8. How far do 8 CpGs tend to reach inside of the repeat? If the 8th CpG is too far inside of the repeat, and it will rarely (if ever) be mappable using Illumina sequencing.</p>
 <pre class="r"><code>dist.from.edge &lt;- rbind(
   cbind(mm10.IAP.LTR.CpGs %&gt;%
@@ -925,6 +982,43 @@ LTR.methy.T &lt;- LTR.CpG.methy(mm10.IAP.LTR.CpGs,  methy.samples.T$files, methy
     ggtitle(&quot;Distribution of read depth at bordering CpGs of IAP LTRs&quot;, subtitle=&quot;B cell samples&quot;)</code></pre>
 <pre><code>Warning: Removed 14185 rows containing non-finite values (stat_bin).</code></pre>
 <p><img src="figure/02.Screen_for_VM_IAP.Rmd/methy.depth.dist.plt-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-methy.depth.dist.plt-1">
+Past versions of methy.depth.dist.plt-1.png
+</button>
+</p>
+<div id="fig-methy.depth.dist.plt-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+95f41a8
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-07-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Thus, it makes more sense to consider the LTRs on a regional level. The strategy then is to combine all the methylation calls from each LTR edge, and produce a single methylation value which is not influenced by the depth of coverage at any of the individual CpGs.</p>
 <pre class="r"><code>MIN.N.CG &lt;- 4
 MIN.COUNT &lt;- 20
@@ -965,6 +1059,14 @@ val.elems.ovlp &lt;- val.elems.ovlp %&gt;%
     filter(element.ID != 3514891) # manually remove duplicate entry for fragmented element
 val.elems.ovlp$val_category &lt;- VMIAP.validation[val.elems.ovlp$queryHits,]$val_category
 val.elems.ovlp$new &lt;- VMIAP.validation[val.elems.ovlp$queryHits,]$new
+
+val.elems.ovlp %&gt;% 
+    dplyr::select(element.ID, val_category) %&gt;%
+    write.table(&quot;data/validation/validation.element_IDs.tsv&quot;,
+                            sep=&quot;\t&quot;, quote=FALSE, row.names=FALSE)
+
+val.elems.ovlp$name &lt;- VMIAP.validation[val.elems.ovlp$queryHits,]$name
+saveRDS(val.elems.ovlp[,-1], &quot;data/R_objects/validation_name_ID.RDS&quot;)
 
 LTR.ranges.filtered &lt;- left_join(LTR.ranges.filtered, dplyr::select(val.elems.ovlp, -queryHits))
 # note: two of the validated elements are missing:
