@@ -65,6 +65,8 @@ The RepeatMasker annotation contains every type of repetitive element and has br
 # cached version of schema: data/misc/Schema_for_rmskOutCurrent.html
 
 import gzip
+import sys
+sys.path.insert(0, './code')
 from fix_RepeatMasker_breaks import fix_RM_breaks
 
 # get id's of all elements containing an IAP
@@ -134,7 +136,7 @@ REFINE.DEBUG <- FALSE
 debug.elems <- 0
 for (elem in unique(mm10.IAP.gr$element.ID)) {
   debug.elems <- debug.elems + 1
-  if (REFINE.DEBUG && debug.elems %% 1000 == 0) { print(debug.elems)}
+  if (REFINE.DEBUG && debug.elems %% 1000 == 0) { print(debug.elems) }
   element.gr <- mm10.IAP.gr[mm10.IAP.gr$element.ID==elem]
   element.gr$specific.subelement <- NULL
   
@@ -228,11 +230,14 @@ To fix these, I will look for at elements of the annotation of the three pattern
 For example, if an `LTR || internal` element is followed by an `internal || LTR` element nearby (or even a solo LTR), I will combine them.
 
 ```{r basic.structure}
+subelement.type <- function(names) {
+	has.int.name <- grepl(".*[-int|_I]$",names)
+	return(c("LTR", "internal")[1+as.numeric(has.int.name)])
+}
+
 get.basic.structure <- function(reduced.s) {
   paste(
-    runValue(Rle(c("LTR", "internal")[
-      1+as.numeric(grepl(".*[-int|_I]$",strsplit(reduced.s, "\\|")[[1]]))
-    ])),
+    runValue(Rle(subelement.type(strsplit(reduced.s, "\\|")[[1]]))),
     collapse="-"
   )
 }
@@ -436,8 +441,13 @@ mm10.IAP.gr[(mm10.IAP.gr %>% as.data.frame() %>%
 mcols(mm10.IAP.gr)[strand(mm10.IAP.gr)=='-', c("first.subelement", "last.subelement")] <- mcols(mm10.IAP.gr)[strand(mm10.IAP.gr)=='-', c("last.subelement", "first.subelement")]
 
 mm10.IAP.gr$is.LTR <- !grepl(".*[-int|_I]$", mm10.IAP.gr$repName)
+
+mm10.IAP.subelem.types <- data.frame(name=as.character(unique(mm10.IAP.gr$repName)), stringsAsFactors = FALSE)
+mm10.IAP.subelem.types$type <- subelement.type(mm10.IAP.subelem.types$name)
+
 saveRDS(mm10.IAP.gr, file.path("data", "R_objects", "mm10.IAP.gr.RDS"))
 saveRDS(mm10.IAP.reduced, file.path("data", "R_objects", "mm10.IAP.reduced.RDS"))
+write.table(mm10.IAP.subelem.types, file.path("data", "repeat_annotations", "IAP_subelement_types.tsv"), sep="\t", quote=FALSE, row.names = FALSE, col.names = FALSE)
 ```
 
 A breakdown of the change in IAP element structures is shown below. 
