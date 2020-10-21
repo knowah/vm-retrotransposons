@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+	<TITLE>Schema for rmskOutCurrent	</TITLE>
+</HEAD>
+<BODY CLASS="hgTables cgi">
+<center><div id='warnBox' style='display:none;'><CENTER><B id='warnHead'></B></CENTER><UL id='warnList'></UL><CENTER><button id='warnOK'></button></CENTER></div></center>
+<A NAME="TOP"></A>
+<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH="100%">
+
+<!-- +++++++++++++++++++++ CONTENT TABLES +++++++++++++++++++ -->
+<TR><TD COLSPAN=3>
+<div id=firstSection>      <!--outer table is for border purposes-->
+      <TABLE WIDTH='100%' BGCOLOR='#888888' BORDER='0' CELLSPACING='0' CELLPADDING='1'><TR><TD>
+    <TABLE BGCOLOR='#FFFEE8' WIDTH='100%'  BORDER='0' CELLSPACING='0' CELLPADDING='0'><TR><TD>
+     <div class='subheadingBar'><div class='windowSize' id='sectTtl'>
+Schema for rmskOutCurrent     </div></div>
+     <TABLE BGCOLOR='#FFFEE8' WIDTH='100%' CELLPADDING=0><TR><TH HEIGHT=10></TH></TR>
+     <TR><TD WIDTH=10>&nbsp;</TD><TD>
+
+
+<script type='text/javascript' SRC='../js/utils.js?v=1585588268'></script>
+<script type='text/javascript' SRC='../js/ajax.js?v=1585588268'></script>
+<B>Database:</B> mm10&nbsp;&nbsp;&nbsp;&nbsp;<B>Primary Table:</B> rmskOutCurrent&nbsp;&nbsp;&nbsp;&nbsp;<B>Row Count: </B>  5,235,046&nbsp&nbsp<B> Data last updated:&nbsp;</B>2018-05-17<BR>
+<B>Format description:</B> RepeatMasker .out record<BR><!--hTableStart-->
+<TABLE BGCOLOR="#888888" BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD>
+<TABLE BORDER="1" BGCOLOR="#FFFEE8" CELLSPACING="0">
+<TR><TH>field</TH><TH>example</TH><TH>SQL type</TH> <TH>description</TH> </TR>
+
+<TR><TD><TT>bin</TT></TD> <TD>607</TD><TD><TT>smallint(5) unsigned</TT></TD> <TD>Indexing field to speed chromosome range queries.</TD></TR>
+<TR><TD><TT>swScore</TT></TD> <TD>14042</TD><TD><TT>int(10) unsigned</TT></TD> <TD>Smith Waterman alignment score</TD></TR>
+<TR><TD><TT>milliDiv</TT></TD> <TD>81</TD><TD><TT>int(10) unsigned</TT></TD> <TD>Base mismatches in parts per thousand</TD></TR>
+<TR><TD><TT>milliDel</TT></TD> <TD>10</TD><TD><TT>int(10) unsigned</TT></TD> <TD>Bases deleted in parts per thousand</TD></TR>
+<TR><TD><TT>milliIns</TT></TD> <TD>2</TD><TD><TT>int(10) unsigned</TT></TD> <TD>Bases inserted in parts per thousand</TD></TR>
+<TR><TD><TT>genoName</TT></TD> <TD>chr1</TD><TD><TT>varchar(255)</TT></TD> <TD>Genomic sequence name</TD></TR>
+<TR><TD><TT>genoStart</TT></TD> <TD>3000000</TD><TD><TT>int(10) unsigned</TT></TD> <TD>Start in genomic sequence</TD></TR>
+<TR><TD><TT>genoEnd</TT></TD> <TD>3000097</TD><TD><TT>int(10) unsigned</TT></TD> <TD>End in genomic sequence</TD></TR>
+<TR><TD><TT>genoLeft</TT></TD> <TD>192471874</TD><TD><TT>int(11)</TT></TD> <TD>-#bases after match in genomic sequence</TD></TR>
+<TR><TD><TT>strand</TT></TD> <TD>-</TD><TD><TT>char(1)</TT></TD> <TD>Relative orientation + or -</TD></TR>
+<TR><TD><TT>repName</TT></TD> <TD>L1MdFanc_I</TD><TD><TT>varchar(255)</TT></TD> <TD>Name of repeat</TD></TR>
+<TR><TD><TT>repClass</TT></TD> <TD>LINE</TD><TD><TT>varchar(255)</TT></TD> <TD>Class of repeat</TD></TR>
+<TR><TD><TT>repFamily</TT></TD> <TD>L1</TD><TD><TT>varchar(255)</TT></TD> <TD>Family of repeat</TD></TR>
+<TR><TD><TT>repStart</TT></TD> <TD>3489</TD><TD><TT>int(11)</TT></TD> <TD>Start (if strand is +) or -#bases after match (if strand is -) in repeat sequence</TD></TR>
+<TR><TD><TT>repEnd</TT></TD> <TD>3586</TD><TD><TT>int(11)</TT></TD> <TD>End in repeat sequence</TD></TR>
+<TR><TD><TT>repLeft</TT></TD> <TD>2987</TD><TD><TT>int(11)</TT></TD> <TD>-#bases after match (if strand is +) or start (if strand is -) in repeat sequence</TD></TR>
+<TR><TD><TT>id</TT></TD> <TD>1</TD><TD><TT>int(11)</TT></TD> <TD>First digit of id field in RepeatMasker .out file. Best ignored.</TD></TR>
+</TABLE>
+</TD></TR></TABLE>
+<!--hTableEnd-->
+
+	</TD><TD WIDTH=15></TD></TR></TABLE>
+	</TD></TR></TABLE>
+	</TD></TR></TABLE>
+	
+</div>
+<div>
+<!-- +++++++++++++++++++++ START NEW SECTION +++++++++++++++++++ -->
+<BR>
+
+   <!--outer table is for border purposes-->
+   <TABLE WIDTH='100%' BGCOLOR='#888888' BORDER='0' CELLSPACING='0' CELLPADDING='1'><TR><TD>
+    <TABLE BGCOLOR='#FFFEE8' WIDTH='100%'  BORDER='0' CELLSPACING='0' CELLPADDING='0'><TR><TD>
+
+<div class='subheadingBar windowSize'>
+Connected Tables and Joining Fields     </div>
+     <TABLE BGCOLOR='#FFFEE8' WIDTH='100%' CELLPADDING=0><TR><TH HEIGHT=10></TH></TR>
+     <TR><TD WIDTH=10>&nbsp;</TD><TD>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mm10.<A HREF="/cgi-bin/hgTables?hgsid=237649742_G0gOxw4L1xpafVgMj5zkHJbB9dJK&hgta_doSchemaDb=mm10&hgta_doSchemaTable=rmskAlignCurrent">rmskAlignCurrent</A>.id (via rmskOutCurrent.id)<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mm10.<A HREF="/cgi-bin/hgTables?hgsid=237649742_G0gOxw4L1xpafVgMj5zkHJbB9dJK&hgta_doSchemaDb=mm10&hgta_doSchemaTable=rmskJoinedCurrent">rmskJoinedCurrent</A>.id (via rmskOutCurrent.id)<BR>
+
+	</TD><TD WIDTH=15></TD></TR></TABLE>
+	</TD></TR></TABLE>
+	</TD></TR></TABLE>
+	
+</div>
+<div>
+<!-- +++++++++++++++++++++ START NEW SECTION +++++++++++++++++++ -->
+<BR>
+
+   <!--outer table is for border purposes-->
+   <TABLE WIDTH='100%' BGCOLOR='#888888' BORDER='0' CELLSPACING='0' CELLPADDING='1'><TR><TD>
+    <TABLE BGCOLOR='#FFFEE8' WIDTH='100%'  BORDER='0' CELLSPACING='0' CELLPADDING='0'><TR><TD>
+
+<div class='subheadingBar windowSize'>
+Sample Rows     </div>
+     <TABLE BGCOLOR='#FFFEE8' WIDTH='100%' CELLPADDING=0><TR><TH HEIGHT=10></TH></TR>
+     <TR><TD WIDTH=10>&nbsp;</TD><TD>
+
+
+<!--hTableStart-->
+<TABLE BGCOLOR="#888888" BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD>
+<TABLE BORDER="1" BGCOLOR="#FFFEE8" CELLSPACING="0">
+<TR><TH>bin</TH><TH>swScore</TH><TH>milliDiv</TH><TH>milliDel</TH><TH>milliIns</TH><TH>genoName</TH><TH>genoStart</TH><TH>genoEnd</TH><TH>genoLeft</TH><TH>strand</TH><TH>repName</TH><TH>repClass</TH><TH>repFamily</TH><TH>repStart</TH><TH>repEnd</TH><TH>repLeft</TH><TH>id</TH></TR><TR><TD>607</TD><TD>14042</TD><TD>81</TD><TD>10</TD><TD>2</TD><TD>chr1</TD><TD>3000000</TD><TD>3000097</TD><TD>192471874</TD><TD>-</TD><TD>L1MdFanc_I</TD><TD>LINE</TD><TD>L1</TD><TD>3489</TD><TD>3586</TD><TD>2987</TD><TD>1</TD></TR>
+<TR><TD>607</TD><TD>27</TD><TD>0</TD><TD>0</TD><TD>0</TD><TD>chr1</TD><TD>3000097</TD><TD>3000123</TD><TD>192471848</TD><TD>+</TD><TD>(T)n</TD><TD>Simple_repeat</TD><TD>Simple_repeat</TD><TD>1</TD><TD>26</TD><TD>0</TD><TD>2</TD></TR>
+<TR><TD>607</TD><TD>14042</TD><TD>81</TD><TD>10</TD><TD>2</TD><TD>chr1</TD><TD>3000123</TD><TD>3002128</TD><TD>192469843</TD><TD>-</TD><TD>L1MdFanc_I</TD><TD>LINE</TD><TD>L1</TD><TD>1467</TD><TD>3488</TD><TD>3085</TD><TD>1</TD></TR>
+<TR><TD>607</TD><TD>2649</TD><TD>176</TD><TD>39</TD><TD>74</TD><TD>chr1</TD><TD>3003147</TD><TD>3004054</TD><TD>192467917</TD><TD>-</TD><TD>L1MdFanc_I</TD><TD>LINE</TD><TD>L1</TD><TD>90</TD><TD>762</TD><TD>5817</TD><TD>1</TD></TR>
+<TR><TD>607</TD><TD>3685</TD><TD>199</TD><TD>21</TD><TD>14</TD><TD>chr1</TD><TD>3004040</TD><TD>3004206</TD><TD>192467765</TD><TD>+</TD><TD>L1_Rod</TD><TD>LINE</TD><TD>L1</TD><TD>1321</TD><TD>1492</TD><TD>4355</TD><TD>3</TD></TR>
+<TR><TD>607</TD><TD>43</TD><TD>65</TD><TD>31</TD><TD>0</TD><TD>chr1</TD><TD>3004206</TD><TD>3004270</TD><TD>192467701</TD><TD>+</TD><TD>(ACAA)n</TD><TD>Simple_repeat</TD><TD>Simple_repeat</TD><TD>1</TD><TD>66</TD><TD>0</TD><TD>4</TD></TR>
+<TR><TD>607</TD><TD>3685</TD><TD>199</TD><TD>21</TD><TD>14</TD><TD>chr1</TD><TD>3004270</TD><TD>3005001</TD><TD>192466970</TD><TD>+</TD><TD>L1_Rod</TD><TD>LINE</TD><TD>L1</TD><TD>1493</TD><TD>2224</TD><TD>3623</TD><TD>3</TD></TR>
+<TR><TD>607</TD><TD>1280</TD><TD>221</TD><TD>44</TD><TD>62</TD><TD>chr1</TD><TD>3005001</TD><TD>3005439</TD><TD>192466532</TD><TD>+</TD><TD>L1_Rod</TD><TD>LINE</TD><TD>L1</TD><TD>2425</TD><TD>2854</TD><TD>2993</TD><TD>3</TD></TR>
+<TR><TD>607</TD><TD>4727</TD><TD>226</TD><TD>59</TD><TD>36</TD><TD>chr1</TD><TD>3005460</TD><TD>3006764</TD><TD>192465207</TD><TD>+</TD><TD>Lx9</TD><TD>LINE</TD><TD>L1</TD><TD>6309</TD><TD>7644</TD><TD>0</TD><TD>5</TD></TR>
+<TR><TD>607</TD><TD>27</TD><TD>161</TD><TD>0</TD><TD>0</TD><TD>chr1</TD><TD>3006790</TD><TD>3006841</TD><TD>192465130</TD><TD>+</TD><TD>A-rich</TD><TD>Low_complexity</TD><TD>Low_complexity</TD><TD>1</TD><TD>51</TD><TD>0</TD><TD>6</TD></TR>
+</TABLE>
+</TD></TR></TABLE>
+<!--hTableEnd-->
+<BR><I>Note: all start coordinates in our database are 0-based, not 
+1-based.  See explanation 
+<A HREF="http://genome.ucsc.edu/FAQ/FAQtracks#tracks1">here</A>.</I>
+
+	</TD><TD WIDTH=15></TD></TR></TABLE>
+	</TD></TR></TABLE>
+	</TD></TR></TABLE>
+	
+</div>
+</TD></TR></TABLE>
+
+</BODY></HTML>

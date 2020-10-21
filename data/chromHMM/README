@@ -1,0 +1,10 @@
+chromHMM liver file (mm9) from:
+https://github.com/gireeshkbogu/chromatin_states_chromHMM_mm9/raw/master/liver_cStates_HMM.zip
+
+lifted over to mm10
+
+citation:
+Chromatin and RNA Maps Reveal Regulatory Long Noncoding RNAs in Mouse
+Gireesh K. Bogu, Pedro Vizán, Lawrence W. Stanton, Miguel Beato, Luciano Di Croce, Marc A. Marti-Renom
+Molecular and Cellular Biology Feb 2016, 36 (5) 809-819; DOI: 10.1128/MCB.00955-15
+
