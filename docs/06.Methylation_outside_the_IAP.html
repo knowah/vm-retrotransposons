@@ -27,6 +27,8 @@
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -371,7 +373,13 @@ div.tocify {
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/knowah/vm-retrotransposons">
+    <span class="fa fa-github"></span>
+     
+    Source code
+  </a>
+</li>
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -507,16 +515,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong0049a6f"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 0049a6f </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomknowahvmretrotransposonstree473dedde53adf9d9e654f54eadf0ef99fa0ecce5targetblank473dedda"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/knowah/vm-retrotransposons/tree/473dedde53adf9d9e654f54eadf0ef99fa0ecce5" target="_blank">473dedd</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong0049a6f" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomknowahvmretrotransposonstree473dedde53adf9d9e654f54eadf0ef99fa0ecce5targetblank473dedda" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 0049a6f. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/knowah/vm-retrotransposons/tree/473dedde53adf9d9e654f54eadf0ef99fa0ecce5" target="_blank">473dedd</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -524,39 +532,20 @@ Note that you need to be careful to ensure that all relevant files for the analy
 <pre><code>
 Ignored files:
     Ignored:    analysis/02.Screen_for_VM_IAP_cache/
-    Ignored:    analysis/figure/
 
 Untracked files:
-    Untracked:  01.IAP_Annotations.Rmd
     Untracked:  20200803.RData
-    Untracked:  FourC.plots.indiv.with_legend.pdf
-    Untracked:  Rplot.svg
-    Untracked:  SciAdv_ME_regions.tsv.txt
     Untracked:  __pycache__/
-    Untracked:  analysis/07.Genomic_Interactions_with_IAPs.Rmd
-    Untracked:  analysis/08.Screen_for_non_IAP_VM.Rmd
-    Untracked:  code/4C_seq.R
+    Untracked:  analysis/unsorted.Rmd
     Untracked:  code/CTCFChIPatVM-IAPs_narrowpeak.sh
     Untracked:  code/CTCFChIPatVM-IAPs_pvalueRelax_narrowpeak.sh
-    Untracked:  code/CTCF_Analysis.Rmd
-    Untracked:  code/CTCF_Analysis.nb.html
-    Untracked:  code/CTCF_motif_in_IAP.Rmd
-    Untracked:  code/CTCF_motif_in_IAP.nb.html
     Untracked:  code/CpGdensity_VM-IAPs.R
-    Untracked:  code/LTR_components.R
-    Untracked:  code/TransposableElements.py
     Untracked:  code/__pycache__/
     Untracked:  code/align_and_save.sh
     Untracked:  code/combine_8Indiv_CTCFChIP.r
     Untracked:  code/combine_8Indiv_CTCFChIP_pvalueRelax.r
-    Untracked:  code/data_functions.R
     Untracked:  code/demultiplex4C_5indiv.sh
-    Untracked:  code/element_metatype_boundaries.py
-    Untracked:  code/fix_RepeatMasker_breaks.py
-    Untracked:  code/genomics_functions.R
     Untracked:  code/heatmaps_NJK.R
-    Untracked:  code/jellyfish_wrapper.py
-    Untracked:  code/kmer_alignment.py
     Untracked:  code/map.commands_cp.sh
     Untracked:  code/mergeBam
     Untracked:  code/normalize_log2.sh
@@ -565,17 +554,21 @@ Untracked files:
     Untracked:  code/plot_chip_in_iap.R
     Untracked:  code/run_fimo_top10percent.sh
     Untracked:  code/run_meme_top_10_percent.sh
-    Untracked:  data/4C-seq/
+    Untracked:  data/4C-seq/bams/
+    Untracked:  data/4C-seq/data/
+    Untracked:  data/4C-seq/processed/
+    Untracked:  data/4C-seq/restriction_frag_info/
     Untracked:  data/R_objects/
-    Untracked:  data/chromHMM/
-    Untracked:  data/ctcf/
+    Untracked:  data/chromHMM/liver_cStates_HMM.mm10.bed
     Untracked:  data/jellyfish/
     Untracked:  data/kmer/
-    Untracked:  data/misc/Schema_for_rmskOutCurrent.html
-    Untracked:  data/misc/mm10.chrom.sizes
-    Untracked:  data/repeat_annotations/
-    Untracked:  data/validation/
-    Untracked:  elems_meta.tsv
+    Untracked:  data/repeat_annotations/cVMIAP.5pLTR.fa
+    Untracked:  data/repeat_annotations/mm10.IAP.meta_subelem.tsv
+    Untracked:  data/repeat_annotations/rmskOutCurrent.Dfam_2_0.v4_0_7.all_IAPs.fixed_500kb_s_20_r_20.tsv.gz
+    Untracked:  data/repeat_annotations/rmskOutCurrent.Dfam_2_0.v4_0_7.all_IAPs.txt.gz
+    Untracked:  data/repeat_annotations/rmskOutCurrent.Dfam_2_0.v4_0_7.txt.gz
+    Untracked:  data/validation/validated_elements.tsv
+    Untracked:  data/validation/validation.element_IDs.tsv
     Untracked:  output/CTCF_ChIP.non_VM.pdf
     Untracked:  output/CTCF_and_motif.NonVM.Full.pdf
     Untracked:  output/CTCF_and_motif.NonVM.pdf
@@ -591,16 +584,6 @@ Untracked files:
     Untracked:  output/Non_ERV.ranges2.background.png
     Untracked:  output/Non_ERV.ranges2.foreground.pdf
     Untracked:  output/Non_ERV.ranges2.foreground.svg
-    Untracked:  test.pdf
-    Untracked:  unsorted.Rmd
-    Untracked:  vm-retrotransposons.Rproj
-    Untracked:  vm_erv.R
-
-Unstaged changes:
-    Deleted:    Paper_VMIAP_2020.Rproj
-    Modified:   README.md
-    Deleted:    analysis/fix_RepeatMasker_breaks.py
-    Deleted:    data/misc/example_broken_IAP.PNG
 
 </code></pre>
 <p>
@@ -644,7 +627,41 @@ Message
 Rmd
 </td>
 <td>
-0049a6f
+<a href="https://github.com/knowah/vm-retrotransposons/blob/473dedde53adf9d9e654f54eadf0ef99fa0ecce5/analysis/06.Methylation_outside_the_IAP.Rmd" target="_blank">473dedd</a>
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-10-21
+</td>
+<td>
+improve plot output size for html
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/knowah/vm-retrotransposons/283b1666cc03b65adb43903fdab5abf3fd0f210e/docs/06.Methylation_outside_the_IAP.html" target="_blank">283b166</a>
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-10-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/knowah/vm-retrotransposons/blob/0049a6ff3ddb2b4de3ea06549bc6f0588e98f0aa/analysis/06.Methylation_outside_the_IAP.Rmd" target="_blank">0049a6f</a>
 </td>
 <td>
 Noah Kessler
@@ -781,11 +798,85 @@ IAP.LTR.adj.CpGs$edge.dist &lt;- with(IAP.LTR.adj.CpGs,
 
 hist(IAP.LTR.adj.CpG.count$N)</code></pre>
 <p><img src="figure/06.Methylation_outside_the_IAP.Rmd/characterizing.adjacent.regions-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-characterizing.adjacent.regions-1">
+Past versions of characterizing.adjacent.regions-1.png
+</button>
+</p>
+<div id="fig-characterizing.adjacent.regions-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/knowah/vm-retrotransposons/blob/283b1666cc03b65adb43903fdab5abf3fd0f210e/docs/figure/06.Methylation_outside_the_IAP.Rmd/characterizing.adjacent.regions-1.png" target="_blank">283b166</a>
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-10-21
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggplot(IAP.LTR.adj.CpGs) +
     geom_histogram(aes(x=abs(edge.dist)), breaks=seq(0, ADJACENCY.DISTANCE, 100)) +
     facet_wrap(. ~ LTR.bound.side) +
     theme_minimal() </code></pre>
 <p><img src="figure/06.Methylation_outside_the_IAP.Rmd/characterizing.adjacent.regions-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-characterizing.adjacent.regions-2">
+Past versions of characterizing.adjacent.regions-2.png
+</button>
+</p>
+<div id="fig-characterizing.adjacent.regions-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/knowah/vm-retrotransposons/blob/283b1666cc03b65adb43903fdab5abf3fd0f210e/docs/figure/06.Methylation_outside_the_IAP.Rmd/characterizing.adjacent.regions-2.png" target="_blank">283b166</a>
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-10-21
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>get.files.and.names &lt;- function(dir, pattern) {
   files &lt;- file.path(dir, list.files(dir, pattern))
   names &lt;- as.character(sapply(files, function(n) paste(strsplit(basename(n),&quot;\\.&quot;)[[1]][1:2], collapse=&quot;_&quot;)))
@@ -884,10 +975,8 @@ cVMIAP.methy &lt;- lapply(
         methy = mC/cvg,
         edge.dist.bin = (1+floor(edge.dist/100))
     ) %&gt;%
-    dplyr::select(-mC, -umC)
-    
-
-methy_outside_IAP_plot &lt;- cVMIAP.methy %&gt;%
+    dplyr::select(-mC, -umC)</code></pre>
+<pre class="r"><code>methy_outside_IAP_plot &lt;- cVMIAP.methy %&gt;%
     filter(
         (LTR.bound.side==&quot;5prime&quot; &amp; edge.dist &lt; 0) | (LTR.bound.side==&quot;3prime&quot; &amp; edge.dist &gt; 0)
     ) %&gt;% # ignore methy inside elements
@@ -906,7 +995,7 @@ methy_outside_IAP_plot &lt;- cVMIAP.methy %&gt;%
     
 
 print(methy_outside_IAP_plot)</code></pre>
-<p><img src="figure/06.Methylation_outside_the_IAP.Rmd/load.methy-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/06.Methylation_outside_the_IAP.Rmd/make.plot-1.png" width="768" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>ggsave(&quot;output/Methylation_outside_cVMIAPs.pdf&quot;, methy_outside_IAP_plot, width=15, height=40)</code></pre>
 <br>
 <p>
