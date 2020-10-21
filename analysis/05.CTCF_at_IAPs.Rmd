@@ -101,6 +101,13 @@ polished.heatmap <- function(df, x.edge.str=NULL, show.legend=TRUE) {
 }
 ```
 
+# Identifying CTCF-bound loci and a motif
+
+Deeptools was used to generate determine CTCF binding scores in 50-bp tiles across the genome, using the combined reads of all eight individuals.
+The score is the log2 ratio of IP reads to input reads.
+
+MACS was used to call peaks across the combined eight-individual dataset and  a flanking region around summits was used as input to MEME to generate peaks. FIMO was then used to identify the locations of that motif within the IAP LTRs.
+
 ```{r get.CTCF.data}
 
 # get GRanges of full IAP extents
@@ -191,7 +198,13 @@ ctcf.plt.ts_vm <- merged_mapq_ge_10.hm.df %>%
 	polished.heatmap(X.EDGE.STR)
 ```
 
-```{r motif}
+# CTCF motif: location within IAP LTRs
+
+The location of the motif within IAP LTRs is shown.
+The location is normalised to the length of each LTR and given in 0.02-length bins.
+Data is presented for 5' LTRs only and for all LTRs.
+
+```{r motif, fig.height=2, fig.width=4.5, fig.align='center'}
 plot.1d.heatmap <- function(df, bin.col, BW, legend.name=NULL) {
   if (is.null(legend.name)) {
     legend.name <- bin.col
@@ -294,7 +307,16 @@ fimo.motif.bar.df$type <- ifelse(
 	"Solo",
 	"Full"
 )
+```
 
+# CTCF in all across IAPs
+
+CTCF scores from deeptools are shown for a 1 kb-flanked window around each IAP.
+Deeptools log2 ratios are averaged across 50 bp tiles in the flanking regions, and across the five tiles of equal length within each element.
+Elements are sorted by averaged log2 score in the 50 bp flanking tile immediately upstream of the 5' edge of each LTR.
+Motif presence/absence tiles show whether the element's 5' LTR contains the primary MEME motif.
+
+```{r combined.plots, fig.align='center', fig.width=5, fig.height=8}
 ### combined plots
 
 ctcf.plot.legend <- merged_mapq_ge_10.hm.df[1,] %>%
@@ -375,4 +397,11 @@ ggsave("output/CTCF_and_motif.all.a4.ps", cowplot::plot_grid(combined.IAP_no_VM,
 
 ggsave("output/CTCF_heatmap_legend.pdf", ctcf.plot.legend, width=1, height=2)
 
+print(combined.IAP_no_VM)
+print(combined.IAP_VM)
+
+```
+
+```{r show.legend, fig.align='center', fig.width=2, fig.height=2}
+print(ctcf.plot.legend)
 ```
