@@ -1,0 +1,280 @@
+---
+title: "03.IAP_Structure.Rmd"
+author: "Noah Kessler"
+date: "13/07/2020"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapse: false
+    code_folding: "hide"
+params:
+  force_metasub: FALSE
+---
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(Biostrings)
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(reticulate)
+use_python(Sys.which("python3"))
+
+source("code/data_functions.R")
+source("code/genomics_functions.R")
+source("code/LTR_components.R")
+
+mm10.IAP.gr <- readRDS("data/R_objects/mm10.IAP.gr.RDS")
+mm10.IAP.reduced <- readRDS("data/R_objects/mm10.IAP.reduced.RDS")
+
+meta_subelem_file <- "data/repeat_annotations/mm10.IAP.meta_subelem.tsv"
+run_metasub = params$force_metasub || !file.exists(meta_subelem_file)
+
+knitr::opts_chunk$set(message = FALSE) 
+```
+
+# Structure of IAPs
+
+What kind of IAP element structure do we see at cVM-IAPs and tsVM-IAPs? How does this compare with the whole genome? 
+
+** Need to run next section; maybe in new file? either way absolute paths need to be fixed, and interpretation below checked **
+
+```{r structure.of.MEs, fig.align="center", fig.width=8, fig.height=8}
+mm10.IAP.top_names <- mm10.IAP.gr %>% as.data.frame() %>%
+  dplyr::select(element.ID, repName, is.LTR, width) %>%
+  group_by(element.ID, is.LTR, repName) %>%
+  summarize(total.bp=sum(width)) %>%
+  group_by(element.ID, is.LTR) %>%
+	arrange(desc(total.bp)) %>%
+  filter(1:n()==1) %>% 
+  ungroup()
+
+saveRDS(mm10.IAP.top_names, "data/R_objects/mm10.IAP.top_names.RDS")
+
+mm10.IAP.top_name.structure <- mm10.IAP.top_names %>%
+	arrange(element.ID, !is.LTR) %>%
+  group_by(element.ID) %>%
+  summarize(top.names=paste(repName, collapse=" – "))
+
+mm10.IAP.reduced <- left_join(mm10.IAP.reduced, mm10.IAP.top_name.structure, by="element.ID")
+mm10.IAP.reduced$optimal.structure <- with(mm10.IAP.reduced,
+                                      ifelse(solo.LTR | fully.structured,
+                                             top.names,
+                                             reduced.structure))
+mm10.IAP.reduced$elem.class <- ifelse(mm10.IAP.reduced$solo.LTR, "Solo LTR", "Fully-structured or Incomplete")
+
+mm10.IAP.optimal.counts <- mm10.IAP.reduced %>%
+	group_by(optimal.structure, elem.class) %>%
+	summarize(count=n())
+
+optimal.counts.plt.df <- rbind(
+	mm10.IAP.optimal.counts %>%
+		mutate(val_category="Genome") %>%
+		dplyr::select(val_category, everything()),
+	read_tsv("data/validation/validation.element_IDs.tsv") %>%
+		left_join(mm10.IAP.reduced, by="element.ID") %>%
+		group_by(val_category, optimal.structure, elem.class) %>%
+		summarize(count=n())
+)
+
+optimal.counts.plt.norm.df <- optimal.counts.plt.df %>%
+	group_by(val_category, elem.class) %>%
+	mutate(count.norm=count/max(count)) %>%
+	ungroup()
+
+
+category.colors <- c(Genome = "#444444", Constitutive = "#1b9e77", `Tissue-specific` = "#d95f02", `False positive` = "#cccccc")
+
+optimal.plt.categories <- c("Genome", "Constitutive", "Tissue-specific")
+optimal.plt.structs <- optimal.counts.plt.norm.df %>%
+	filter(val_category %in% setdiff(optimal.plt.categories, "Genome")) %>%
+	filter(count >= 1) %>%
+	pull(optimal.structure) %>%
+	unique
+
+optimal.plt.st.order <- optimal.counts.plt.norm.df %>%
+	filter(val_category == "Genome" & optimal.structure %in% optimal.plt.structs) %>%
+	arrange(desc(count)) %>%
+	pull(optimal.structure)
+
+optimal.counts.plt.norm.df %>% 
+	filter(val_category %in% optimal.plt.categories
+   			 & optimal.structure %in% optimal.plt.structs) %>%
+	complete(val_category,
+    			 nesting(optimal.structure, elem.class),
+    			 fill=list(count=0.001, count.norm=0.001)) %>%
+	mutate(
+		optimal.structure = forcats::fct_relabel(
+			factor(optimal.structure, levels=rev(optimal.plt.st.order)),
+			~ gsub("\\|", " || ", gsub("IAP-?", "", .))
+		),
+		val_category = factor(val_category, levels=rev(optimal.plt.categories))
+	) %>%
+	ggplot(aes(x=optimal.structure)) +
+	  geom_bar(aes(y=count.norm, fill=val_category), stat="identity", position="dodge") +
+	  coord_flip() +
+		theme_bw(base_size=18) +
+	  theme(panel.grid.major.y = element_blank(),
+	        axis.text.y = element_text(face="bold", size=16, color = "black"),
+	        axis.ticks.y = element_line(color="black", size=10),
+	        axis.ticks.length.y = unit(0.03, "cm"),
+	        legend.position = c(0.825, 0.075),
+	        legend.background=element_rect(color="black"),
+	        legend.title=element_blank(),
+	        legend.margin=margin(0, 0.25, 0.25, 0.2, unit='cm')) +
+	  ylab("Relative frequency of element structure") + xlab(NULL) +
+	  scale_y_continuous(expand=c(0, 0.01)) +
+	  scale_fill_manual(guide=guide_legend(reverse=TRUE), values=category.colors) +
+	  facet_grid(vars(elem.class),  scales = "free_y", space="free_y")
+```
+
+# Internal components of IAP LTRs
+
+Even after the mending of fragmented elements, there is still unncessary fragmentation of many LTRs and internal regions (e.g., there are frequently multiple adjacent internal sub-elements within a fully-structured element).
+To better determine the size and sub-structure of the LTRs, here we combine these fragmented sub-element annotations into 'meta-subelements', so that a solo LTR only has one entry, and fully-structured IAPs only have two LTR entries and one internal entry.
+
+```{python generate.meta.subelements, eval=run_metasub}
+import sys
+sys.path.insert(0, './code')
+from element_metatype_boundaries import *
+
+IAP_meta_types = load_meta_types("data/repeat_annotations/IAP_subelement_types.tsv")
+IAP_elements = load_elements("data/repeat_annotations/mm10.IAP.mended.tsv", IAP_meta_types)
+	
+save_element_metatype_boundaries(IAP_elements, r.meta_subelem_file)
+```
+
+The distribution of the sizes of each subelement is shown below:
+
+```{r meta.sub, fig.width=6, fig.height=2.5, fig.align='center'}
+mm10.IAP.meta <- read_tsv(meta_subelem_file, col_names = c("chrom", "start", "end", "strand", "element.ID", "meta.subelement")) %>%
+	separate(meta.subelement, c("subelem.idx", "subelem.type", "subelem.subidx"), remove=FALSE) %>%
+	mutate(width=end-start+1)
+
+mm10.IAP.meta %>%
+	filter((subelem.type=="internal" & width < 10000) | (subelem.type=="LTR" & width < 1000)) %>%
+	ggplot(aes(x=width)) +
+		geom_histogram(binwidth=20, center=10) +
+		theme_minimal() +
+		facet_wrap(vars(subelem.type), scales="free")
+
+saveRDS(mm10.IAP.meta, "data/R_objects/mm10.IAP.meta.RDS")
+```
+
+Summary statistics:
+
+*LTR*
+
+`r summary(mm10.IAP.meta[mm10.IAP.meta$subelem.type=="LTR",]$width)`
+
+*internal*
+
+`r summary(mm10.IAP.meta[mm10.IAP.meta$subelem.type=="internal",]$width)`
+
+```{r find.LTR.components, fig.align='center', fig.width=6, fig.height=3}
+acceptable.ltr.widths <- quantile(mm10.IAP.meta[mm10.IAP.meta$subelem.type=="LTR",]$width, c(0.025, 0.95))
+
+LTR.gr <- mm10.IAP.meta %>%
+	filter(subelem.type=="LTR" & width >= acceptable.ltr.widths[1] & width <= acceptable.ltr.widths[2]) %>%
+	mutate(rowname=sprintf("%d_%s", element.ID, meta.subelement)) %>%
+  tibble::column_to_rownames() %>% 
+  dplyr::select(chrom, start, end, strand) %>%
+	df.as.gr(use.names=TRUE)
+
+LTR.seqs <- getSeq(BSgenome.Mmusculus.UCSC.mm10, LTR.gr)
+
+
+LTR.components <- lapply(LTR.seqs, function(x) {
+	tryCatch({
+		suppressWarnings(identify.LTR.components(x))
+	}, error = function(e) {
+		message(e, "\n", x)
+		return(list())
+	})
+})
+
+get.R.bounds <- function(comps) c(comps$R.initial.G, comps$R.terminal.CA[2])
+ltr.has.components <- unlist(lapply(LTR.components, length)) > 0
+
+is.5p_or_solo_LTR <- endsWith(names(LTR.components), "_1:LTR:1")
+
+R.bounds <- list()
+for (ltr.name in names(LTR.components[is.5p_or_solo_LTR])) {
+	ltr.comp <- LTR.components[[ltr.name]]
+	if (length(ltr.comp) == 1) R.bounds[[ltr.name]] <- get.R.bounds(ltr.comp[[1]])
+	else if (length(ltr.comp) > 1) {
+		unique.Rs <- unique(lapply(ltr.comp, get.R.bounds))
+		if (length(unique.Rs) == 1) R.bounds[[ltr.name]] <- unique.Rs[[1]]
+	}
+}
+
+R.bound.frac <- lapply(names(R.bounds), function(nm) R.bounds[[nm]] / width(LTR.seqs[nm]))
+bound.frac.U3_R <- unlist(purrr::map(R.bound.frac, 1))
+bound.frac.R_U5 <- unlist(purrr::map(R.bound.frac, 2))
+
+gradient.plot <- function(middles, edges, colors, height=1) {
+	stopifnot(length(middles) == length(edges))
+	stopifnot(all(sapply(edges, length) == 2))
+	stopifnot(length(colors) == length(middles)+1)
+	
+	create.gradient <- function(mincolor, maxcolor, N=15, trim.end=c(FALSE, FALSE)) {
+		colors <- colorRampPalette(c(mincolor, maxcolor))(N)
+		if (trim.end[1]) colors <- colors[-1]
+		if (trim.end[2]) colors <- colors[-N]
+		grid::rasterGrob(
+			t(colors),
+			width = unit(1,"npc"), height = unit(1,"npc"),
+			just="center", interpolate = TRUE
+		)
+	}
+	
+	plt <- ggplot(data.frame(x=c(0, 1), y=c(0, height))) +
+		#geom_point(aes(x=x, y=y))
+		#xlim(0, 1) + ylim(0, height)
+		scale_x_continuous(limits=c(0, 1), expand=c(0, 0)) +
+		scale_y_continuous(limits=c(0, height), expand=c(0, 0))
+	
+	for (idx in 1:length(middles)) {
+		gL <- create.gradient("white", colors[idx], trim.end=c(TRUE, FALSE))
+		gR <- create.gradient(colors[idx+1], "white", trim.end=c(FALSE, TRUE))
+		
+		m <- middles[idx]
+		e <- edges[[idx]]
+		
+		plt <- plt + 
+			annotation_custom(gL, xmin=e[1], xmax=m, ymin=0, ymax=height) +
+			annotation_custom(gR, xmin=m, xmax=e[2], ymin=0, ymax=height)
+	}
+	
+	plt +
+		theme(
+			axis.title = element_blank(),
+			panel.grid = element_blank(),
+			panel.background = element_rect(fill="white"),
+			panel.border = element_rect(color="black", fill=NA, size=1),
+			plot.margin = unit(c(0.03, 0.03, 0.03, 0.03), "npc"), 
+			axis.text.y = element_blank(), 
+			axis.ticks.y = element_blank(),
+			axis.text.x = element_text(color="black"),
+			axis.ticks.x = element_line(color="black")
+		)
+}
+
+comp.mids <- c(
+	median(bound.frac.U3_R, na.rm=TRUE),
+	median(bound.frac.R_U5, na.rm=TRUE)
+)
+plt.quantiles <- c(0.1, 0.9)
+comp.edges <- list(
+	quantile(bound.frac.U3_R, plt.quantiles, na.rm=TRUE),
+	quantile(bound.frac.R_U5, plt.quantiles, na.rm=TRUE)
+)
+comp.colors <- c("#1b9e77", "#d95f02", "#7570b3")
+
+comp.centres <- c(mean(c(0, comp.mids[1])), mean(c(comp.mids)), mean(c(comp.mids[2], 1)))
+
+gradient.plot(comp.mids, comp.edges, comp.colors) +
+	annotate("text", x=comp.centres, y=0.5, label=c("U3", "R", "U5"), size=8)
+```
