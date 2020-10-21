@@ -1,0 +1,378 @@
+---
+title: "04.IAP_Sequence.Rmd"
+author: "Noah Kessler"
+date: "10/08/2020"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapse: false
+    code_folding: "hide"
+params:
+  K: 15
+  abyss_path: "/usr/local/bin/abyss-align"
+  jellyfish_path: "/usr/local/bin/jellyfish"
+  jellyfish_threads: 12
+---
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(Biostrings)
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(reticulate)
+use_python(Sys.which("python3"))
+
+library(knitr)
+library(kableExtra)
+
+source("code/genomics_functions.R")
+source("code/data_functions.R")
+knitr::opts_chunk$set(message = FALSE) 
+```
+
+After finding enrichment of specific types of IAPs among the VM-IAPs, we wondered whether there was some specific sequence within the VM-IAPs that was conferring the variability (e.g. via binding proteins).
+Since such a sequence could be of any length, a _k_-mer analysis was performed, which is agnostic to specific lengths (assuming the sequence is at least _k_ bases long).
+For this analysis, we will use _k_ = `r params$K`.
+
+# Identifying enriched _k_-mers
+
+```{r load.IAP.seqs}
+IAP.meta.gr <- df.as.gr(readRDS("data/R_objects/mm10.IAP.meta.RDS"))
+
+LTRs.for.kmer <- IAP.meta.gr[
+	width(IAP.meta.gr) > 200 & width(IAP.meta.gr) <= 700 & endsWith(IAP.meta.gr$meta.subelement, ":LTR:1")
+]
+names(LTRs.for.kmer) <- with(LTRs.for.kmer, sprintf("%d_%s", element.ID, meta.subelement))
+
+IAP.seqs <- getSeq(Mmusculus, LTRs.for.kmer)
+IAP.seqs.IDs <- as.numeric(strsplit.n(names(IAP.seqs), "_"))
+
+validation <- readRDS("data/R_objects/validation_name_ID.RDS")
+cVMIAP.IDs <- validation[validation$val_category == "Constitutive",]$element.ID
+tsVMIAP.IDs <- validation[validation$val_category == "Tissue-specific",]$element.ID
+IAP.top_names <- readRDS("data/R_objects/mm10.IAP.top_names.RDS")
+
+cVMIAP_seq_path <- "data/repeat_annotations/cVMIAP.5pLTR.fa"
+writeXStringSet(IAP.seqs[IAP.seqs.IDs %in% cVMIAP.IDs], cVMIAP_seq_path, format="fasta")
+```
+
+```{python run.jellyfish}
+import os
+import sys
+sys.path.insert(0, './code')
+from jellyfish_wrapper import *
+
+kmer_K = r.params['K']
+jf_fasta = r.cVMIAP_seq_path
+jf_path = r.params['jellyfish_path']
+jf_t = r.params['jellyfish_threads']
+jf_outdir = 'data/jellyfish'
+if not os.path.exists(jf_outdir):
+	os.mkdir(jf_outdir, mode=0o755)
+jf_out_prefix = os.path.basename(r.cVMIAP_seq_path)+str(kmer_K)+"_mer_counts"
+jf_out_prefix = os.path.join(jf_outdir, jf_out_prefix)
+
+jf_bc_file = jf_out_prefix + ".bc"
+jf_count_file = jf_out_prefix + ".jf"
+jf_dump_file = jf_out_prefix + ".count"
+
+
+run_jellyfish_bc(jf_fasta, jf_path, kmer_K, threads=jf_t, outfile=jf_bc_file)
+
+run_jellyfish_count(jf_fasta, jf_path, kmer_K, "500M", threads=jf_t, outfile=jf_count_file, bcfile=jf_bc_file)
+
+run_jellyfish_dump(jf_count_file, jf_path, jf_dump_file)
+```
+
+```{r load.kmer.data}
+kmers.df <- read_tsv(py$jf_dump_file, col_names=c("kmer", "count"))
+kmers.PD <- PDict(DNAStringSet(kmers.df$kmer), max.mismatch=0)
+```
+
+Jellyfish was used to generate the complete list of `r params$K`-mers found in the 5' LTRs of the `r length(cVMIAP.IDs)` known constitutive IAPs (NB: each k-mer must have appeared at least twice in the sequence of all the VM-IAPs).
+
+Out of a possible `r scales::comma(4 ** params$K)` `r params$K`-mers, there were `r scales::comma(nrow(kmers.df))` which were represented in at least 2 VM-IAPs.
+Among these represented `r params$K`-mers, the median, mean, and maximum number of VM-IAPs containing them is `r median(kmers.df$count)`, `r sprintf("%.1f", mean(kmers.df$count))`, and `r max(kmers.df$count)`, respectively.
+
+```{r count.kmers}
+# identify which IAPs contain each k-mer
+IAP.kmer.match <- vcountPDict(kmers.PD, IAP.seqs, max.mismatch = 0, with.indels = FALSE)
+IAP.kmer.match <- t(IAP.kmer.match) > 0 # convert to boolean matrix
+rownames(IAP.kmer.match) <- strsplit.n(names(IAP.seqs), "_")
+colnames(IAP.kmer.match) <- kmers.df$kmer
+IAP.kmer.match <- tibble::rownames_to_column(as.data.frame(IAP.kmer.match), "element.ID")
+
+# add cVM-IAP info
+IAP.kmer.match$category <- "Not_cVMIAP"
+IAP.kmer.match[IAP.kmer.match$element.ID %in% cVMIAP.IDs,]$category <- "cVMIAP"
+
+IAP.kmer.counts <- IAP.kmer.match %>%
+  dplyr::select(-element.ID) %>%
+  group_by(category) %>%
+  summarize_all(sum) %>%
+  gather(-category, key="kmer", value="count") %>%
+  spread(category, count)
+
+IAP.kmer.counts$All <- with(IAP.kmer.counts, cVMIAP + Not_cVMIAP)
+IAP.kmer.counts$cVMIAP.norm <- IAP.kmer.counts$cVMIAP / length(cVMIAP.IDs)
+IAP.kmer.counts$Not_cVMIAP.norm <- IAP.kmer.counts$Not_cVMIAP / sum(IAP.kmer.match$category == "Not_cVMIAP")
+IAP.kmer.counts$All.norm <- IAP.kmer.counts$All / length(IAP.seqs)
+
+IAP.kmer.counts$E.cVMIAP_Not <- with(IAP.kmer.counts, cVMIAP.norm / Not_cVMIAP.norm)
+IAP.kmer.counts$E.cVMIAP_All <- with(IAP.kmer.counts, cVMIAP.norm / All.norm)
+
+# write out all hits
+write_tsv(arrange(IAP.kmer.counts, desc(E.cVMIAP_All), desc(cVMIAP)), sprintf("data/kmer/IAP.%d_mer.enrichments.tsv", params$K))
+
+IAP_kmer_top <- IAP.kmer.counts %>% 
+  filter(cVMIAP >= 5 & E.cVMIAP_All >= 20) %>%
+  arrange(desc(E.cVMIAP_All)) %>%
+	pull(kmer)
+```
+
+The _k_-mers are:
+
+`r kable(arrange(IAP.kmer.counts, desc(E.cVMIAP_All), desc(cVMIAP)), format="html") %>% kable_styling() %>% scroll_box(height="400px")`
+
+# Aligning _k_-mers into longer sequences
+
+```{r enrichment.functions}
+seq.hits <- function(query.seq, seqs) vcountPattern(query.seq, seqs) > 0
+
+seq.count <- function(query.seq, seqs, check.RC=TRUE) {
+	hits <- seq.hits(query.seq, seqs)
+	if (check.RC) {
+		hits <- hits | seq.hits(reverseComplement(DNAString(query.seq)), seqs)
+	}
+	return(sum(hits))
+}
+
+seq.enrichment <- function(query.seq, seqs.focus, seqs.bkgd, sum.denom=TRUE) {
+	count.focus <- seq.count(query.seq, seqs.focus)
+	count.bkgd <- seq.count(query.seq, seqs.bkgd)
+	
+	if (sum.denom) {
+		e <- (count.focus/length(seqs.focus)) / ((count.focus+count.bkgd)/(length(seqs.focus)+length(seqs.bkgd)))
+	} else {
+		e <- (count.focus/length(seqs.focus)) / (count.bkgd/length(seqs.bkgd))
+	}
+	
+	return(e)
+}
+
+maximize.subseq.enrichment <- function(query.seq, seqs.focus, seqs.bkgd, min.length, verbose=FALSE) {
+	if (verbose) {
+		message(sprintf("Identifying maximal subseq in %s [%d]", query.seq, nchar(query.seq)))
+	}
+	if (nchar(query.seq) <= min.length) {
+		if (verbose) {
+			message("Sequence is <= min.length nucleotides; using full sequence.")
+		}
+		return(query.seq)
+	}
+	
+	max.seq <- NULL
+	max.e <- 0
+	for (subseq.len in min.length:nchar(query.seq)) {
+		for (subseq.start in 1:(nchar(query.seq)-subseq.len+1)) {
+			this.subseq <- substr(query.seq, subseq.start, subseq.start+subseq.len-1)
+			e <- seq.enrichment(this.subseq, seqs.focus, seqs.bkgd)
+			if (e > max.e || (e == max.e && subseq.len > nchar(max.seq))) {
+				if (verbose) {
+					message(sprintf("New maximal subseq: %s [%d]\t%.1f", this.subseq, nchar(this.subseq), e))
+				}
+				max.e <- e
+				max.seq <- this.subseq
+			}
+		}
+	}
+	
+	return(max.seq)
+}
+
+make.enrichment.table <- function(seqs) {
+	is.cVMIAP <- IAP.seqs.IDs %in% cVMIAP.IDs
+	is.tsVMIAP <- IAP.seqs.IDs %in% tsVMIAP.IDs
+	
+	All.hits <- lapply(seqs, seq.hits, IAP.seqs)
+	
+	cVMIAP.hit.ID <- lapply(All.hits, function(h) IAP.seqs.IDs[which(h & is.cVMIAP)])
+	cVMIAP.hit.names <- unlist(lapply(cVMIAP.hit.ID,
+		function(ids) paste(sort(validation[validation$element.ID %in% ids,]$name), collapse=", ")
+	))
+	
+	tsVMIAP.hit.ID <- lapply(All.hits, function(h) IAP.seqs.IDs[which(h & is.tsVMIAP)])
+	tsVMIAP.hit.names <- unlist(lapply(tsVMIAP.hit.ID,
+		function(ids) paste(sprintf("(%s)", sort(validation[validation$element.ID %in% ids,]$name)), collapse=", ")
+	))
+	
+	All.count <- unlist(lapply(All.hits, sum))
+	cVMIAP.count <- unlist(lapply(cVMIAP.hit.ID, length))
+	All.frac <- All.count/length(IAP.seqs)
+	cVMIAP.frac <- cVMIAP.count/sum(is.cVMIAP)
+	
+	All.LTR.types.str <- unlist(lapply(All.hits, function(hits) {
+		ids <- IAP.seqs.IDs[hits]
+		names <- IAP.top_names %>%
+			filter(is.LTR & element.ID %in% ids) %>%
+			group_by(repName) %>%
+			summarize(N=n()) %>%
+			mutate(frac=N/sum(N)) %>%
+			arrange(desc(frac), repName) %>%
+			mutate(trimmed.name = gsub("^IAP", "", repName))
+		names.str <- sprintf("%s (%0.1f%%)", names$trimmed.name, 100*names$frac)
+		paste(names.str, collapse=", ")
+	}))
+	
+	data.frame(
+		Sequence = sprintf("%s (%d)", seqs, nchar(seqs)),
+		`cVM-IAPs` = sprintf("%d (%0.1f%%)", cVMIAP.count, 100*cVMIAP.frac),
+		`All IAPs` = sprintf("%d (%0.1f%%)", All.count, 100*All.frac), 
+		Enrichment = sprintf("%.1f", cVMIAP.frac / All.frac),
+		`VM-IAP names` = paste0(cVMIAP.hit.names,
+		  ifelse(nchar(tsVMIAP.hit.names) > 0, paste0(", ", tsVMIAP.hit.names), "")
+		),
+		`LTR types` = All.LTR.types.str,
+		stringsAsFactors = FALSE,
+		check.names = FALSE
+	) %>%
+		arrange(desc(as.numeric(Enrichment)))
+}
+```
+
+```{python get.alignments}
+from kmer_alignment import *
+
+kmer_groups = group_kmers(r.IAP_kmer_top)
+kmer_extended_seqs = [get_abyss_alignment(kmers, r.params['abyss_path']).upper() for kmers in kmer_groups]
+```
+
+```{r get.max.enrichment.seqs}
+max.enrichment.seqs <- unlist(
+	lapply(py$kmer_extended_seqs,
+				 maximize.subseq.enrichment,
+				 seqs.focus = IAP.seqs[IAP.kmer.match$category=="cVMIAP",],
+				 seqs.bkgd = IAP.seqs[IAP.kmer.match$category!="cVMIAP",],
+				 min.length = params$K
+	)
+)
+```
+
+The top sequences enriched in the cVM-IAPs, as derived from aligning the _k_-mers, are given below.
+These were further refined by maximising the enrichment amongst substrings of the aligned sequence.
+The enriched sequences are:
+
+`r kable(make.enrichment.table(max.enrichment.seqs)) %>% kable_styling()`
+
+Using the original aligned _k_-mer sequences, without maximising enrichment, the sequences are:
+
+`r kable(make.enrichment.table(py$kmer_extended_seqs)) %>% kable_styling()`
+
+# CpG density
+
+_Code in this section originally written by A.D.H., edited by N.J.K. for consistency with the rest of this document._
+
+CpG density is equal to the number of CpG dinucleotides divided by the length of the LTR (i.e., CpGs per bp).
+For simplicity, it is plotted as CpGs per 100 bp.
+
+```{r CpG.density, fig.width=10, fig.height=6}
+
+# make data frame of IAP elements, 5' LTR lengths and CpG counts
+IAPs_5pLTR.CG <- data.frame(
+	element.ID = IAP.seqs.IDs,
+	LTR.length = width(IAP.seqs),
+	CG.count = vcountPattern("CG", IAP.seqs)
+)
+
+# calculate CpG density
+IAPs_5pLTR.CG$CG.density <- with(IAPs_5pLTR.CG, CG.count / LTR.length)
+
+# categorize by variability
+IAPs_5pLTR.CG$category <- factor("Other IAPs", levels=c("cVM-IAPs", "tsVM-IAPs","Other IAPs"))
+IAPs_5pLTR.CG[IAPs_5pLTR.CG$element.ID %in% cVMIAP.IDs,]$category <- "cVM-IAPs"
+IAPs_5pLTR.CG[IAPs_5pLTR.CG$element.ID %in% tsVMIAP.IDs,]$category <- "tsVM-IAPs"
+
+# include LTR types
+IAPs_5pLTR.CG$type <- left_join(
+	IAPs_5pLTR.CG,
+	filter(IAP.top_names, is.LTR),
+	by="element.ID"
+)$repName
+
+# get count of LTR types
+IAPs_5pLTR.counts <- IAPs_5pLTR.CG %>%
+	group_by(type) %>%
+	summarize(N=n())
+
+# make data frame for plotting
+IAPs_5pLTR.CG.plt.df <- IAPs_5pLTR.CG %>%
+	# exclude rare non-IAP LTRs
+	filter(grepl("IAP", type)) %>%
+	# include count of LTR type in axis label
+	left_join(IAPs_5pLTR.counts, by="type") %>%
+	mutate(type.N = sprintf("%s (%d)", type, N))
+
+# get order of LTR types arranged by median CpG density
+IAPs_5pLTR.CG.plt.order <- IAPs_5pLTR.CG.plt.df %>%
+	group_by(type.N) %>%
+	summarize(type.CG.med = median(CG.density)) %>%
+	arrange(desc(type.CG.med)) %>%
+	pull(type.N)
+
+# refactor LTR types by density order
+IAPs_5pLTR.CG.plt.df$type.N <- factor(IAPs_5pLTR.CG.plt.df$type.N, levels=IAPs_5pLTR.CG.plt.order)
+
+# hide non-variable IAPs in plot
+IAPs_5pLTR.CG.plt.df$alpha <- ifelse(as.character(IAPs_5pLTR.CG.plt.df$category)=="Other IAPs", 0, 1)
+
+# plot CpG density by LTR type, showing boxplots for
+# all IAP LTRs and individual points for each c-/tsVM-IAP
+CG.density.plt <- ggplot(IAPs_5pLTR.CG.plt.df, aes(x=type.N, y=CG.density*100)) + 
+	geom_boxplot() +
+	geom_jitter(aes(color=category, alpha=alpha), shape=21, size=2, position=position_jitter(seed=1000)) +
+	geom_jitter(aes(color=category, alpha=alpha), shape=20, size=1.2, position=position_jitter(seed=1000)) +
+	scale_alpha_identity() +
+  scale_color_manual(values=c("cVM-IAPs"="#469C8D","tsVM-IAPs"="#BF7F41","Other IAPs"="black")) +
+	guides(color=guide_legend(title=NULL)) +
+	xlab("LTR type") +
+	ylab("CpG dinucleotides per 100bp") +
+	coord_flip() +
+	theme_minimal() +
+	theme(panel.grid = element_blank(),
+				axis.text = element_text(color="black"),
+				axis.ticks.x=element_line(color="black"))
+
+ggsave("output/CpG_density_plt.pdf", plot=CG.density.plt, height=5, width=10, useDingbats=FALSE)
+```
+
+It's clear from the plot that the cVM-IAPs with IAPLTR2_Mm LTRs have higher CpG density than non-variable IAPs, and the opposite appears to be the case with IAPLTR1_Mm elements.
+Are these differences significant?
+
+```{r cg.density.stats}
+CGdensity.LTR2.cVM <- IAPs_5pLTR.CG %>%
+		filter(type=="IAPLTR2_Mm" & category=="cVM-IAPs") %>%
+		pull(CG.density)
+
+CGdensity.LTR2.nonVM <- IAPs_5pLTR.CG %>%
+		filter(type=="IAPLTR2_Mm" & category=="Other IAPs") %>%
+		pull(CG.density)
+
+t.test(100*CGdensity.LTR2.cVM, 100*CGdensity.LTR2.nonVM)
+
+CGdensity.LTR1.cVM <- IAPs_5pLTR.CG %>%
+		filter(type=="IAPLTR1_Mm" & category=="cVM-IAPs") %>%
+		pull(CG.density)
+
+CGdensity.LTR1.nonVM <- IAPs_5pLTR.CG %>%
+		filter(type=="IAPLTR1_Mm" & category=="Other IAPs") %>%
+		pull(CG.density)
+
+t.test(100*CGdensity.LTR1.cVM, 100*CGdensity.LTR1.nonVM)
+````
+
+Yes.
+For IAPLTR2_Mm elements, cVM-IAPs have significantly higher CpG densities than non-variable elements.
+For IAPLTR1_Mm elements, cVM-IAPs have significantly lower CpG densities than non-variable elements.
