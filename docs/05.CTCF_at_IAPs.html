@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Noah Kessler" />
+
+
+<title>CTCF binding at IAPs</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Genomic Context of Variably-Methylated Repeats</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">CTCF binding at IAPs</h1>
+<h4 class="author">Noah Kessler</h4>
+<h4 class="date">24/08/2020</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-10-21
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>vm-retrotransposons/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20200511code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20200511)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20200511code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20200511)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongcfa969f"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> cfa969f </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongcfa969f" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version cfa969f. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/02.Screen_for_VM_IAP_cache/
+
+Untracked files:
+    Untracked:  01.IAP_Annotations.Rmd
+    Untracked:  20200803.RData
+    Untracked:  FourC.plots.indiv.with_legend.pdf
+    Untracked:  Rplot.svg
+    Untracked:  SciAdv_ME_regions.tsv.txt
+    Untracked:  __pycache__/
+    Untracked:  analysis/06.Methylation_outside_the_IAP.Rmd
+    Untracked:  analysis/07.Genomic_Interactions_with_IAPs.Rmd
+    Untracked:  analysis/08.Screen_for_non_IAP_VM.Rmd
+    Untracked:  code/4C_seq.R
+    Untracked:  code/CTCFChIPatVM-IAPs_narrowpeak.sh
+    Untracked:  code/CTCFChIPatVM-IAPs_pvalueRelax_narrowpeak.sh
+    Untracked:  code/CTCF_Analysis.Rmd
+    Untracked:  code/CTCF_Analysis.nb.html
+    Untracked:  code/CTCF_motif_in_IAP.Rmd
+    Untracked:  code/CTCF_motif_in_IAP.nb.html
+    Untracked:  code/CpGdensity_VM-IAPs.R
+    Untracked:  code/LTR_components.R
+    Untracked:  code/TransposableElements.py
+    Untracked:  code/__pycache__/
+    Untracked:  code/align_and_save.sh
+    Untracked:  code/combine_8Indiv_CTCFChIP.r
+    Untracked:  code/combine_8Indiv_CTCFChIP_pvalueRelax.r
+    Untracked:  code/data_functions.R
+    Untracked:  code/demultiplex4C_5indiv.sh
+    Untracked:  code/element_metatype_boundaries.py
+    Untracked:  code/fix_RepeatMasker_breaks.py
+    Untracked:  code/genomics_functions.R
+    Untracked:  code/heatmaps_NJK.R
+    Untracked:  code/jellyfish_wrapper.py
+    Untracked:  code/kmer_alignment.py
+    Untracked:  code/map.commands_cp.sh
+    Untracked:  code/mergeBam
+    Untracked:  code/normalize_log2.sh
+    Untracked:  code/normalize_log2_IAP_consensus.sh
+    Untracked:  code/normalize_log2_mergedBams.sh
+    Untracked:  code/plot_chip_in_iap.R
+    Untracked:  code/run_fimo_top10percent.sh
+    Untracked:  code/run_meme_top_10_percent.sh
+    Untracked:  data/4C-seq/
+    Untracked:  data/R_objects/
+    Untracked:  data/chromHMM/
+    Untracked:  data/ctcf/
+    Untracked:  data/jellyfish/
+    Untracked:  data/kmer/
+    Untracked:  data/misc/Schema_for_rmskOutCurrent.html
+    Untracked:  data/misc/mm10.chrom.sizes
+    Untracked:  data/repeat_annotations/
+    Untracked:  data/validation/
+    Untracked:  elems_meta.tsv
+    Untracked:  output/CTCF_ChIP.non_VM.pdf
+    Untracked:  output/CTCF_and_motif.NonVM.Full.pdf
+    Untracked:  output/CTCF_and_motif.NonVM.pdf
+    Untracked:  output/CTCF_and_motif.VM.pdf
+    Untracked:  output/CTCF_and_motif.all.a4.pdf
+    Untracked:  output/CTCF_heatmap_legend.pdf
+    Untracked:  output/CpG_density_plt.pdf
+    Untracked:  output/FourC.combo_plots.pdf
+    Untracked:  output/FourC.indiv_plots.pdf
+    Untracked:  output/Methylation_outside_cVMIAPs.pdf
+    Untracked:  output/Non_ERV.ranges2.background.png
+    Untracked:  output/Non_ERV.ranges2.foreground.pdf
+    Untracked:  output/Non_ERV.ranges2.foreground.svg
+    Untracked:  test.pdf
+    Untracked:  unsorted.Rmd
+    Untracked:  vm-retrotransposons.Rproj
+    Untracked:  vm_erv.R
+
+Unstaged changes:
+    Deleted:    Paper_VMIAP_2020.Rproj
+    Modified:   README.md
+    Deleted:    analysis/fix_RepeatMasker_breaks.py
+    Deleted:    data/misc/example_broken_IAP.PNG
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/05.CTCF_at_IAPs.Rmd</code>) and HTML (<code>docs/05.CTCF_at_IAPs.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+cfa969f
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-10-21
+</td>
+<td>
+wflow_publish(“analysis/05.CTCF_at_IAPs.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(rtracklayer)
+library(ggplot2)
+library(readr)
+library(knitr)
+library(kableExtra)
+
+source(&quot;code/genomics_functions.R&quot;)
+source(&quot;code/data_functions.R&quot;)
+knitr::opts_chunk$set(message = FALSE) </code></pre>
+<pre class="r"><code>plot.heatmap &lt;- function(heatmap.df, feat.width, label.col=NULL) {
+  if (&quot;type&quot; %in% names(heatmap.df)) {
+    heatmap.df$old.feat.idx &lt;- heatmap.df$feat.idx
+    feat.idx.mapping &lt;- heatmap.df[,c(&quot;type&quot;, &quot;old.feat.idx&quot;)] %&gt;%
+        distinct() %&gt;%
+        arrange(type, old.feat.idx) %&gt;%
+        mutate(feat.idx=1:n())
+    heatmap.df$feat.idx &lt;- NULL
+    heatmap.df &lt;- left_join(heatmap.df, feat.idx.mapping, by=c(&quot;type&quot;, &quot;old.feat.idx&quot;))
+  }
+  
+  plt &lt;- ggplot(heatmap.df) +
+    geom_tile(aes(x=pos, y=-feat.idx, fill=score)) +
+    xlab(NULL) +
+    ylab(NULL) + 
+    theme_bw() + 
+    theme(panel.border = element_blank(),
+          panel.grid = element_blank())
+  
+  if (is.null(label.col)) {
+    plt &lt;- plt +
+      theme(axis.text.y = element_blank(),
+            axis.ticks.y = element_blank())
+  }
+  else
+  {
+    label.df &lt;- distinct(heatmap.df[,c(&quot;feat.idx&quot;, label.col)]) %&gt;% arrange(feat.idx)
+    plt &lt;- plt + scale_y_continuous(breaks=-label.df$feat.idx, labels=label.df[,label.col], expand=expand_scale(add=c(0.2, 0.2)))
+  }
+  
+  plt
+}
+
+get.x_axis.breaks &lt;- function() {
+  break.pts &lt;- c(
+    -1 * FLANK / TILE.WIDTH,
+    0,
+    FEATURE.TILES,
+    FLANK / TILE.WIDTH + FEATURE.TILES
+  )
+  return(break.pts - 0.5)
+}
+
+polished.heatmap &lt;- function(df, x.edge.str=NULL, show.legend=TRUE) {
+  if (is.null(x.edge.str)) {
+    x.edge.str &lt;- as.character(FLANK)
+  }
+    x.expand &lt;- c(0.01, 0)
+    
+  plt &lt;- plot.heatmap(df, FEATURE.TILES) +
+    scale_fill_gradient2(
+        limits=SCORE.LIMS,
+        low=&quot;#1012b2&quot;, mid=&quot;white&quot;, high=&quot;#b21210&quot;, 
+        midpoint=0
+    ) +
+    scale_y_continuous(expand=c(0.02,0))
+  
+  if (!show.legend) {
+    x.expand &lt;- c(0.02, 0)
+    plt &lt;- plt + guides(fill=FALSE)
+  }
+   
+  plt &lt;- plt + scale_x_continuous(
+        breaks=get.x_axis.breaks(),
+      labels=c(paste0(&quot;-&quot;, x.edge.str), &quot;5&#39;&quot;, &quot;3&#39;&quot;, paste0(&quot;+&quot;, x.edge.str)),
+      expand=x.expand
+    ) +
+    facet_wrap(vars(type), ncol=1, scales=&quot;free&quot;)
+  
+  return(plt)
+}</code></pre>
+<pre class="r"><code># get GRanges of full IAP extents
+IAP.extent.gr &lt;- extent.gr(
+    with(
+        read_tsv(&quot;data/repeat_annotations/mm10.IAP.mended.tsv&quot;, col_names=FALSE),
+        GRanges(X1, IRanges(X2, X3), strand=X4, element.ID=X10)
+    ),
+    by=&quot;element.ID&quot;
+)
+
+# load validated element IDs
+validation &lt;- readRDS(&quot;data/R_objects/validation_name_ID.RDS&quot;) %&gt;%
+    filter(val_category != &quot;False positive&quot;)
+
+# get element IDs of solo LTRs
+solo.LTR.IDs &lt;- readRDS(&quot;data/R_objects/mm10.IAP.meta.RDS&quot;) %&gt;%
+    group_by(element.ID) %&gt;%
+    filter(n()==1) %&gt;%
+    ungroup() %&gt;%
+    filter(meta.subelement==&quot;1:LTR:1&quot;) %&gt;%
+    pull(element.ID)
+
+# set parameters for plotting
+FLANK &lt;- 1000
+TILE.WIDTH &lt;- 50
+FEATURE.TILES &lt;- 5
+X.EDGE.STR &lt;- &quot;1kb&quot;
+
+# load CTCF data
+log2_merged_mapq_ge_10.data.gr &lt;- with(
+  read_tsv(file.path(params$ctcf_norm_dir, &quot;log2ratio_mapq_ge_10.bdg&quot;), col_names = FALSE),
+  GRanges(X1, IRanges(X2, X3), score=X4)
+)
+
+# make CTCF data 1-indexed and non-overlapping
+log2_merged_mapq_ge_10.data.gr &lt;- resize(
+    log2_merged_mapq_ge_10.data.gr, 
+    width=width(log2_merged_mapq_ge_10.data.gr)-1,
+    fix=&quot;end&quot;
+)
+
+# generate heatmap tile data
+merged_mapq_ge_10.hm.df &lt;- as.data.frame(
+    mcols(score.features(
+        log2_merged_mapq_ge_10.data.gr,
+        gr.inside.flank.tiles(IAP.extent.gr, 5, 1000, 50, keep.cols=&quot;element.ID&quot;),
+        &quot;score&quot;
+    ))
+)
+
+# get elements ordered by CTCF at 5&#39; outside tile
+IAP_ctcf_meta &lt;- merged_mapq_ge_10.hm.df %&gt;%
+    as.data.frame %&gt;%
+    filter(pos==-1) %&gt;%
+    arrange(desc(score)) %&gt;%
+    mutate(feat.idx=1:n()) %&gt;%
+    dplyr::select(element.ID, feat.idx) %&gt;%
+    left_join(validation, by=&quot;element.ID&quot;)
+
+# add column for solo vs full/fragmented
+IAP_ctcf_meta$type &lt;- ifelse(
+    IAP_ctcf_meta$element.ID %in% solo.LTR.IDs,
+    &quot;Solo LTR&quot;,
+    &quot;Fully-structured or fragmented&quot;
+)
+
+# add order column
+merged_mapq_ge_10.hm.df &lt;- left_join(merged_mapq_ge_10.hm.df, IAP_ctcf_meta, by=&quot;element.ID&quot;)
+
+# define score limits
+SCORE.LIMS &lt;- c(
+    min(merged_mapq_ge_10.hm.df$score, na.rm=TRUE),
+    max(merged_mapq_ge_10.hm.df$score, na.rm=TRUE)
+)
+
+# make CTCF plots
+ctcf.plt.non_vm &lt;- merged_mapq_ge_10.hm.df %&gt;%
+    filter(is.na(val_category)) %&gt;% 
+    polished.heatmap(X.EDGE.STR)
+
+ctcf.plt.c_vm &lt;- merged_mapq_ge_10.hm.df %&gt;%
+    filter(val_category==&quot;Constitutive&quot;) %&gt;% 
+    polished.heatmap(X.EDGE.STR)
+
+ctcf.plt.ts_vm &lt;- merged_mapq_ge_10.hm.df %&gt;%
+    filter(val_category==&quot;Tissue-specific&quot;) %&gt;% 
+    polished.heatmap(X.EDGE.STR)</code></pre>
+<pre class="r"><code>plot.1d.heatmap &lt;- function(df, bin.col, BW, legend.name=NULL) {
+  if (is.null(legend.name)) {
+    legend.name &lt;- bin.col
+  }
+  bin.col &lt;- enquo(bin.col)
+  ggplot(df) +
+    geom_tile(aes(x=!!bin.col + BW/2, y=0.5, width=BW, height=1, fill=count)) +
+    scale_fill_gradient(name=legend.name, low=&quot;white&quot;, high=&quot;black&quot;, limits=c(0, max(df$count))) + 
+    xlab(NULL) + ylab(NULL) +
+    scale_x_continuous(limits=c(0, 1), expand=c(0, 0)) +
+    scale_y_continuous(expand=c(0, 0)) +
+    theme_minimal()  +
+    theme(
+        panel.grid = element_blank(),
+        axis.text.x = element_text(color=&quot;black&quot;, size=14),
+        axis.ticks.x = element_line(color=&quot;black&quot;, size=0.5),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        panel.border = element_rect(color=&quot;black&quot;, fill=NA, size=1),
+        plot.margin = unit(c(1,0,1,1), units=&quot;lines&quot;),
+        legend.text = element_text(size=14), 
+        legend.title = element_text(size=14, hjust = 0.5)
+  )
+}
+
+make.motif.plt &lt;- function(df, theme_fn=theme_bw) {
+  margin.to.use &lt;- theme_fn()$plot.margin
+  margin.to.use[2] &lt;- unit(0, &quot;pt&quot;)
+  margin.to.use[4] &lt;- unit(0, &quot;pt&quot;)
+  
+  df %&gt;%
+    mutate(score=has.motif, pos=1) %&gt;%
+        plot.heatmap(df) +
+        scale_fill_manual(values=c(`TRUE`=&quot;black&quot;, `FALSE`=&quot;#00000000&quot;))+
+        scale_y_continuous(expand=c(0.02,0)) +
+        guides(fill=FALSE) + 
+        facet_wrap(vars(type), ncol=1, scales=&quot;free_y&quot;) +
+        theme(
+            axis.ticks.x = element_blank(),
+          axis.text.x = element_blank(),
+          plot.margin = margin.to.use
+        )
+}
+
+combine.motif.and.ctcf.plot &lt;- function(motif.plt, ctcf.plt) {
+    cowplot::plot_grid(
+        motif.plt,
+        ctcf.plt,
+        nrow=1,
+        rel_widths=c(0.075, 0.925),
+        align=&quot;hv&quot;,
+        axis=&quot;ltb&quot;
+    )
+}
+
+#load CTCF motif location data
+fimo.CTCF.gr &lt;- with(
+    read_tsv(&quot;data/ctcf/motif/fimo.multiFixed.MEME-1.tsv&quot;, col_names = FALSE),
+    GRanges(X1, IRanges(X2, X3), element.ID=X4, subelementID=X5, subelemCoord=X7, motif=toupper(X8), strand=X6, motifStart=X9, motifEnd=X10, motifID=X12)
+)
+
+fimo.motif.df &lt;- mcols(fimo.CTCF.gr) %&gt;%
+    as.data.frame %&gt;%
+    filter(motifID==&quot;MEME-1&quot; &amp; grepl(&quot;:LTR:&quot;, subelementID)) %&gt;%
+    mutate(
+        is.5p.LTR=grepl(&quot;:LTR:1&quot;,subelementID),
+        subelem.width=width(GRanges(subelemCoord)),
+        motif.start.frac=motifStart / subelem.width
+    )
+
+# plot locations of motifs in 1-d heatmap
+FRAC.BINWIDTH &lt;- 1/50
+motif.frac.counts &lt;- fimo.motif.df %&gt;%
+    filter(is.5p.LTR) %&gt;%
+    mutate(frac.bin=FRAC.BINWIDTH * floor(motif.start.frac / FRAC.BINWIDTH)) %&gt;%
+    group_by(frac.bin) %&gt;%
+    summarize(count=n())
+
+plot.1d.heatmap(motif.frac.counts, frac.bin, FRAC.BINWIDTH, &quot;CTCF motif\nfrequency&quot;)</code></pre>
+<p><img src="figure/05.CTCF_at_IAPs.Rmd/motif-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>motif.frac.counts.all_LTR &lt;- fimo.motif.df %&gt;%
+    #filter(is.5p.LTR) %&gt;%
+    mutate(frac.bin=FRAC.BINWIDTH * floor(motif.start.frac / FRAC.BINWIDTH)) %&gt;%
+    group_by(frac.bin) %&gt;%
+    summarize(count=n())
+
+plot.1d.heatmap(motif.frac.counts.all_LTR, frac.bin, FRAC.BINWIDTH, &quot;CTCF motif\nfrequency&quot;)</code></pre>
+<p><img src="figure/05.CTCF_at_IAPs.Rmd/motif-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># plot vertical presence/absence plot of motif
+fimo.motif.bar.df &lt;-  fimo.motif.df %&gt;%
+    filter(is.5p.LTR) %&gt;%
+    left_join(IAP_ctcf_meta, ., by=&quot;element.ID&quot;) %&gt;%
+    mutate(has.motif=!is.na(motif.start.frac)) %&gt;%
+    dplyr::select(element.ID, feat.idx, val_category, name, type, has.motif) %&gt;%
+    distinct()
+
+# use shortened facet titles
+fimo.motif.bar.df$type &lt;- ifelse(
+    fimo.motif.bar.df$element.ID %in% solo.LTR.IDs,
+    &quot;Solo&quot;,
+    &quot;Full&quot;
+)
+
+### combined plots
+
+ctcf.plot.legend &lt;- merged_mapq_ge_10.hm.df[1,] %&gt;%
+    polished.heatmap(X.EDGE.STR) %&gt;%
+    cowplot::get_legend() %&gt;%
+    cowplot::ggdraw()
+
+combined.IAP_no_VM.Full &lt;- combine.motif.and.ctcf.plot(
+    fimo.motif.bar.df %&gt;%
+        filter(is.na(val_category) &amp; type==&quot;Full&quot;) %&gt;%
+        make.motif.plt,
+    merged_mapq_ge_10.hm.df %&gt;%
+        filter(is.na(val_category) &amp; type==&quot;Fully-structured or fragmented&quot;) %&gt;% 
+        polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_no_VM.Solo &lt;- combine.motif.and.ctcf.plot(
+    fimo.motif.bar.df %&gt;%
+        filter(is.na(val_category) &amp; type==&quot;Solo&quot;) %&gt;%
+        make.motif.plt,
+    merged_mapq_ge_10.hm.df %&gt;%
+        filter(is.na(val_category) &amp; type==&quot;Solo LTR&quot;) %&gt;% 
+        polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_c_VM.Full &lt;- combine.motif.and.ctcf.plot(
+    fimo.motif.bar.df %&gt;%
+        filter(val_category==&quot;Constitutive&quot; &amp; type==&quot;Full&quot;) %&gt;%
+        make.motif.plt,
+    merged_mapq_ge_10.hm.df %&gt;%
+        filter(val_category==&quot;Constitutive&quot; &amp; type==&quot;Fully-structured or fragmented&quot;) %&gt;% 
+        polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_c_VM.Solo &lt;- combine.motif.and.ctcf.plot(
+    fimo.motif.bar.df %&gt;%
+        filter(val_category==&quot;Constitutive&quot; &amp; type==&quot;Solo&quot;) %&gt;%
+        make.motif.plt,
+    merged_mapq_ge_10.hm.df %&gt;%
+        filter(val_category==&quot;Constitutive&quot; &amp; type==&quot;Solo LTR&quot;) %&gt;% 
+        polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_ts_VM.Full &lt;- combine.motif.and.ctcf.plot(
+    fimo.motif.bar.df %&gt;%
+        filter(val_category==&quot;Tissue-specific&quot; &amp; type==&quot;Full&quot;) %&gt;%
+        make.motif.plt,
+    merged_mapq_ge_10.hm.df %&gt;%
+        filter(val_category==&quot;Tissue-specific&quot; &amp; type==&quot;Fully-structured or fragmented&quot;) %&gt;% 
+        polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_ts_VM.Solo &lt;- combine.motif.and.ctcf.plot(
+    fimo.motif.bar.df %&gt;%
+        filter(val_category==&quot;Tissue-specific&quot; &amp; type==&quot;Solo&quot;) %&gt;%
+        make.motif.plt,
+    merged_mapq_ge_10.hm.df %&gt;%
+        filter(val_category==&quot;Tissue-specific&quot; &amp; type==&quot;Solo LTR&quot;) %&gt;% 
+        polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_no_VM &lt;- cowplot::plot_grid(combined.IAP_no_VM.Full, combined.IAP_no_VM.Solo, ncol=1)
+combined.IAP_VM &lt;- cowplot::plot_grid(
+    combined.IAP_c_VM.Full,
+    combined.IAP_c_VM.Solo,
+    combined.IAP_ts_VM.Full,
+    combined.IAP_ts_VM.Solo,
+    ncol=1
+)
+
+ggsave(&quot;output/CTCF_and_motif.NonVM.pdf&quot;, combined.IAP_no_VM, width=5, height=8)
+
+ggsave(&quot;output/CTCF_and_motif.VM.pdf&quot;, combined.IAP_VM, width=5, height=8)
+
+ggsave(&quot;output/CTCF_and_motif.all.a4.pdf&quot;, cowplot::plot_grid(combined.IAP_no_VM, combined.IAP_VM, ncol=2), width=8.3*0.95, height=11.7*0.6)
+ggsave(&quot;output/CTCF_and_motif.all.a4.svg&quot;, cowplot::plot_grid(combined.IAP_no_VM, combined.IAP_VM, ncol=2), width=8.3*0.95, height=11.7*0.6)
+ggsave(&quot;output/CTCF_and_motif.all.a4.ps&quot;, cowplot::plot_grid(combined.IAP_no_VM, combined.IAP_VM, ncol=2), width=8.3*0.95, height=11.7*0.6)
+
+ggsave(&quot;output/CTCF_heatmap_legend.pdf&quot;, ctcf.plot.legend, width=1, height=2)</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.6.1 (2019-07-05)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Debian GNU/Linux 9 (stretch)
+
+Matrix products: default
+BLAS:   /usr/lib/libblas/libblas.so.3.7.0
+LAPACK: /usr/lib/lapack/liblapack.so.3.7.0
+
+locale:
+ [1] LC_CTYPE=en_GB.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_GB.UTF-8        LC_COLLATE=en_GB.UTF-8    
+ [5] LC_MONETARY=en_GB.UTF-8    LC_MESSAGES=en_GB.UTF-8   
+ [7] LC_PAPER=en_GB.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_GB.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] gdtools_0.2.1        kableExtra_1.1.0     knitr_1.26          
+ [4] readr_1.3.1          rtracklayer_1.44.4   GenomicRanges_1.36.1
+ [7] GenomeInfoDb_1.20.0  IRanges_2.18.3       S4Vectors_0.22.1    
+[10] BiocGenerics_0.30.0  ggplot2_3.2.1        dplyr_0.8.3         
+
+loaded via a namespace (and not attached):
+ [1] Biobase_2.44.0              httr_1.4.1                 
+ [3] viridisLite_0.3.0           assertthat_0.2.1           
+ [5] GenomeInfoDbData_1.2.1      Rsamtools_2.0.3            
+ [7] yaml_2.2.0                  pillar_1.4.2               
+ [9] backports_1.1.5             lattice_0.20-41            
+[11] glue_1.3.1                  digest_0.6.23              
+[13] promises_1.1.0              XVector_0.24.0             
+[15] rvest_0.3.5                 colorspace_1.4-1           
+[17] cowplot_1.0.0               htmltools_0.4.0            
+[19] httpuv_1.5.2                Matrix_1.2-18              
+[21] XML_3.98-1.20               pkgconfig_2.0.3            
+[23] zlibbioc_1.30.0             purrr_0.3.3                
+[25] scales_1.1.0                webshot_0.5.2              
+[27] svglite_1.2.3               whisker_0.4                
+[29] later_1.0.0                 BiocParallel_1.18.1        
+[31] git2r_0.26.1                tibble_2.1.3               
+[33] farver_2.0.1                withr_2.1.2                
+[35] SummarizedExperiment_1.14.1 lazyeval_0.2.2             
+[37] magrittr_1.5                crayon_1.3.4               
+[39] evaluate_0.14               fs_1.3.1                   
+[41] xml2_1.2.2                  tools_3.6.1                
+[43] hms_0.5.2                   lifecycle_0.1.0            
+[45] matrixStats_0.55.0          stringr_1.4.0              
+[47] munsell_0.5.0               DelayedArray_0.10.0        
+[49] Biostrings_2.52.0           compiler_3.6.1             
+[51] systemfonts_0.1.1           rlang_0.4.2                
+[53] grid_3.6.1                  RCurl_1.95-4.12            
+[55] rstudioapi_0.10             bitops_1.0-6               
+[57] labeling_0.3                rmarkdown_1.18             
+[59] gtable_0.3.0                R6_2.4.1                   
+[61] GenomicAlignments_1.20.1    zeallot_0.1.0              
+[63] workflowr_1.6.2             rprojroot_1.3-2            
+[65] stringi_1.4.3               Rcpp_1.0.3                 
+[67] vctrs_0.2.0                 tidyselect_0.2.5           
+[69] xfun_0.11                  </code></pre>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
