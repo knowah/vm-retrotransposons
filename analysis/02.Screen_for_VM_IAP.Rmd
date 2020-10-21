@@ -148,7 +148,7 @@ mm10.IAP.LTR.look_right <- mm10.IAP.gr[with(mm10.IAP.gr,
 )]
 
 # load mm10 CpG locations
-mm10.CpG.gr <- sortSeqlevels(readRDS("data/R_objects/mm10.CpG.gr.RDS"))
+mm10.CpG.gr <- sortSeqlevels(get.mm10.CpGs())
 mm10.CpG.gr <- sort(mm10.CpG.gr) # should be sorted, but force anyway since it's needed
 
 # define relevant CpGs
@@ -171,27 +171,6 @@ mm10.IAP.df <- mm10.IAP.gr %>%
   as.data.frame() %>%
   group_by(element.ID, seqnames, strand) %>%
   summarize(start=min(start), end=max(end))
-
-#mm10.IAP.LTR.adj.CpGs <- rbind(
-#  index.r_join(mm10.IAP.LTR.look_left, CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_right, 0, TRUE)),
-#  index.r_join(mm10.IAP.LTR.look_right, CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_left, 0, FALSE))
-#) %>%
-#  arrange(element.ID, side, CG.index) %>%
-#  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
-#
-#mm10.IAP.LTR.adj.CpGs <- rbind(
-#  index.r_join(
-#    mm10.IAP.LTR.look_left,
-#    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_right, 0, TRUE)
-#  ),
-#  index.r_join(
-#    mm10.IAP.LTR.look_right,
-#    CpGs.in.region(mm10.CpG.gr, mm10.IAP.LTR.adjacent.look_left, 0, FALSE)
-#  )
-#) %>%
-#  arrange(element.ID, side, CG.index) %>%
-#  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
-#colnames(mm10.IAP.LTR.adj.CpGs)[1] <- "chrom"
 ```
 
 The number of CpGs selected for these analyses is `r N.CPG`.
@@ -307,6 +286,14 @@ val.elems.ovlp <- val.elems.ovlp %>%
 	filter(element.ID != 3514891) # manually remove duplicate entry for fragmented element
 val.elems.ovlp$val_category <- VMIAP.validation[val.elems.ovlp$queryHits,]$val_category
 val.elems.ovlp$new <- VMIAP.validation[val.elems.ovlp$queryHits,]$new
+
+val.elems.ovlp %>% 
+	dplyr::select(element.ID, val_category) %>%
+	write.table("data/validation/validation.element_IDs.tsv",
+							sep="\t", quote=FALSE, row.names=FALSE)
+
+val.elems.ovlp$name <- VMIAP.validation[val.elems.ovlp$queryHits,]$name
+saveRDS(val.elems.ovlp[,-1], "data/R_objects/validation_name_ID.RDS")
 
 LTR.ranges.filtered <- left_join(LTR.ranges.filtered, dplyr::select(val.elems.ovlp, -queryHits))
 # note: two of the validated elements are missing:
