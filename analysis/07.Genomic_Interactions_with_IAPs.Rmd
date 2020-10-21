@@ -1,0 +1,125 @@
+---
+title: "Genomic interactions with IAPs"
+author: "Noah Kessler"
+date: "29/09/2020"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapse: false
+    code_folding: "hide"
+params:
+  force: false
+---
+
+```{r setup, include=FALSE}
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(EnsDb.Mmusculus.v79)
+library(readr)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+source("code/4C_seq.R")
+source("code/genomics_functions.R")
+knitr::opts_chunk$set(echo = TRUE)
+
+# experiment metadata
+ASSAYS <- c("marveld2", "tfec", "pink1", "mbnl1", "dst")
+DATA.PATH <- "data/4C-seq"
+GENOME.4C <- BSgenome.Mmusculus.UCSC.mm10::Mmusculus
+CUTTERS <- c("GATC", "CATG")
+
+
+# load methy data for the indivs used for 4C-seq
+# to order the plots by methy
+fourc.methy <- read.table("data/4C-seq/FourC.indiv_methy.tsv", sep="\t", header=TRUE, stringsAsFactors = FALSE)
+fourc.methy <- fourc.methy %>%
+	pivot_longer(-Assay, names_to="indiv", values_to="methy") %>%
+	arrange(Assay, desc(methy)) %>%
+	mutate(old.name=sprintf("%s_%s_1", tolower(Assay), indiv),
+				 new.name=sprintf("%s (%.1f%% methy.)", gsub("Indiv", "Indiv. ", indiv), methy))
+
+# load chromHMM annotations
+chromHMM_liver <- read.table("data/chromHMM/liver_cStates_HMM.mm10.bed", header=FALSE)[,1:4]
+colnames(chromHMM_liver) <- c("chrom", "start", "end", "full.state")
+chromHMM.colors <- 
+	c(
+		"Poised Promoter"="#c5c0ff",
+		"Active Promoter"="#7570b3",
+		"Txn Transition"="#c93f62",
+		"Weak Txn"="#ff8f32",
+		"Txn Elongation"="#d95f02",
+		"Poised Enhancer"="#4bcea7",
+		"Strong Enhancer"="#1b9e77",
+		"Insulator"="gray80",
+		"Repressed"="gray50",
+		"Heterochrom"="black"
+	)
+chromHMM.categories <- c(rep("Promoter", 2), rep("Transcription", 3), rep("Enhancer", 2), rep("Negative", 3))
+chromHMM_liver$state <- factor(gsub("_", " ", gsub("^[0-9]+_", "",  chromHMM_liver$full.state)),
+															 levels=names(chromHMM.colors)
+)
+chromHMM_liver$category <- factor(chromHMM.categories[match(chromHMM_liver$state, names(chromHMM.colors))], levels=unique(chromHMM.categories))
+chromHMM_liver <- df.as.gr(chromHMM_liver)
+
+mm10.ensdb <- EnsDb.Mmusculus.v79
+```
+
+```{r load.4C.data}
+
+fourc.rds <- "data/R_objects/FourC.sum_alpha01.RDS"
+
+if (!file.exists(fourc.rds) || params$force) {
+	FourC.sum_alpha01 <- sapply(
+		ASSAYS,
+		process_4C_data, 
+		ensdb=mm10.ensdb, chromhmm=chromHMM_liver, loess.alpha=0.01,
+		simplify = FALSE, USE.NAMES=TRUE
+	)
+	saveRDS(FourC.sum_alpha01, fourc.rds)
+} else {
+	FourC.sum_alpha01 <- readRDS(fourc.rds)
+}
+
+```
+
+```{r fourc.plots, fig.align='center', fig.width=8, fig.height=10}
+
+fourc_combo_plots <- gridExtra::marrangeGrob(lapply(FourC.sum_alpha01, arrange.combo.and.gene.plt), ncol=1, nrow=1, top=NULL)
+fourc_indiv_plots <- gridExtra::marrangeGrob(lapply(FourC.sum_alpha01, arrange.indiv.and.gene.plt), ncol=1, nrow=1, top=NULL)
+
+ggsave("output/FourC.combo_plots.pdf", fourc_combo_plots, width=8.3, height=11.7)
+ggsave("output/FourC.indiv_plots.pdf", fourc_indiv_plots, width=8.3, height=11.7)
+```
+
+```{r export.processed.data}
+# export processed data for each sample
+for (indiv in 1:5) {
+	indiv.nm <- paste0("Indiv", indiv)
+	processed.data <- NULL
+	for (assay in ASSAYS) {
+		this.chr <- as.character(colData(FourC.sum_alpha01[[assay]]$fc)$chr)[1]
+		this.data <- FourC.sum_alpha01[[assay]]$plt.df %>%
+			mutate(sample=as.character(sample)) %>%
+			separate(sample, c("assay", "sample", "ignore"), "_") %>%
+			filter(sample==indiv.nm) %>%
+			dplyr::select(-ignore) %>%
+			cbind(chrom=this.chr, .) %>%
+			rename(
+				frag_start="start",
+				frag_end="end",
+				frag_midpt="mid",
+				dist_from_viewpt="dist",
+				lognorm_counts="counts"
+			)
+		processed.data <- rbind(processed.data, this.data)
+	}
+	
+	write_tsv(
+		processed.data,
+		paste0("data/4C-seq/processed/FourC.lognorm_counts.all_viewpoints.", indiv.nm, ".tsv"),
+		col_names=TRUE,
+		quote=FALSE
+	)
+}
+```
