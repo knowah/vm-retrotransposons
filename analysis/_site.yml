@@ -1,7 +1,7 @@
-name: "Genomic Context of Variably-Methylated Repeats"
+name: Genomic Context of Variably-Methylated Repeats
 output_dir: ../docs
 navbar:
-  title: "Genomic Context of Variably-Methylated Repeats"
+  title: Genomic Context of Variably-Methylated Repeats
   left:
   - text: Home
     href: index.html
@@ -9,11 +9,15 @@ navbar:
     href: about.html
   - text: License
     href: license.html
+  right:
+  - icon: fa-github
+    text: Source code
+    href: https://github.com/knowah/vm-retrotransposons
 output:
   workflowr::wflow_html:
     toc: yes
     toc_float:
-      collapse: false
-    code_folding: "hide"
+      collapse: no
+    code_folding: hide
     theme: cosmo
     highlight: textmate
