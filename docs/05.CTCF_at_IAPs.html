@@ -507,16 +507,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongcfa969f"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> cfa969f </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong59d60ec"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 59d60ec </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongcfa969f" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong59d60ec" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version cfa969f. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 59d60ec. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -581,6 +581,8 @@ Untracked files:
     Untracked:  output/CTCF_and_motif.NonVM.pdf
     Untracked:  output/CTCF_and_motif.VM.pdf
     Untracked:  output/CTCF_and_motif.all.a4.pdf
+    Untracked:  output/CTCF_and_motif.all.a4.ps
+    Untracked:  output/CTCF_and_motif.all.a4.svg
     Untracked:  output/CTCF_heatmap_legend.pdf
     Untracked:  output/CpG_density_plt.pdf
     Untracked:  output/FourC.combo_plots.pdf
@@ -637,6 +639,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+59d60ec
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-10-21
+</td>
+<td>
+wflow_publish(“analysis/05.CTCF_at_IAPs.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+efea61e
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-10-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -743,6 +779,10 @@ polished.heatmap &lt;- function(df, x.edge.str=NULL, show.legend=TRUE) {
   
   return(plt)
 }</code></pre>
+<div id="identifying-ctcf-bound-loci-and-a-motif" class="section level1">
+<h1>Identifying CTCF-bound loci and a motif</h1>
+<p>Deeptools was used to generate determine CTCF binding scores in 50-bp tiles across the genome, using the combined reads of all eight individuals. The score is the log2 ratio of IP reads to input reads.</p>
+<p>MACS was used to call peaks across the combined eight-individual dataset and a flanking region around summits was used as input to MEME to generate peaks. FIMO was then used to identify the locations of that motif within the IAP LTRs.</p>
 <pre class="r"><code># get GRanges of full IAP extents
 IAP.extent.gr &lt;- extent.gr(
     with(
@@ -829,6 +869,10 @@ ctcf.plt.c_vm &lt;- merged_mapq_ge_10.hm.df %&gt;%
 ctcf.plt.ts_vm &lt;- merged_mapq_ge_10.hm.df %&gt;%
     filter(val_category==&quot;Tissue-specific&quot;) %&gt;% 
     polished.heatmap(X.EDGE.STR)</code></pre>
+</div>
+<div id="ctcf-motif-location-within-iap-ltrs" class="section level1">
+<h1>CTCF motif: location within IAP LTRs</h1>
+<p>The location of the motif within IAP LTRs is shown. The location is normalised to the length of each LTR and given in 0.02-length bins. Data is presented for 5’ LTRs only and for all LTRs.</p>
 <pre class="r"><code>plot.1d.heatmap &lt;- function(df, bin.col, BW, legend.name=NULL) {
   if (is.null(legend.name)) {
     legend.name &lt;- bin.col
@@ -908,7 +952,44 @@ motif.frac.counts &lt;- fimo.motif.df %&gt;%
     summarize(count=n())
 
 plot.1d.heatmap(motif.frac.counts, frac.bin, FRAC.BINWIDTH, &quot;CTCF motif\nfrequency&quot;)</code></pre>
-<p><img src="figure/05.CTCF_at_IAPs.Rmd/motif-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/05.CTCF_at_IAPs.Rmd/motif-1.png" width="432" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-motif-1">
+Past versions of motif-1.png
+</button>
+</p>
+<div id="fig-motif-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+efea61e
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-10-21
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>motif.frac.counts.all_LTR &lt;- fimo.motif.df %&gt;%
     #filter(is.5p.LTR) %&gt;%
     mutate(frac.bin=FRAC.BINWIDTH * floor(motif.start.frac / FRAC.BINWIDTH)) %&gt;%
@@ -916,7 +997,44 @@ plot.1d.heatmap(motif.frac.counts, frac.bin, FRAC.BINWIDTH, &quot;CTCF motif\nfr
     summarize(count=n())
 
 plot.1d.heatmap(motif.frac.counts.all_LTR, frac.bin, FRAC.BINWIDTH, &quot;CTCF motif\nfrequency&quot;)</code></pre>
-<p><img src="figure/05.CTCF_at_IAPs.Rmd/motif-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/05.CTCF_at_IAPs.Rmd/motif-2.png" width="432" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-motif-2">
+Past versions of motif-2.png
+</button>
+</p>
+<div id="fig-motif-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+efea61e
+</td>
+<td>
+Noah Kessler
+</td>
+<td>
+2020-10-21
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># plot vertical presence/absence plot of motif
 fimo.motif.bar.df &lt;-  fimo.motif.df %&gt;%
     filter(is.5p.LTR) %&gt;%
@@ -930,9 +1048,12 @@ fimo.motif.bar.df$type &lt;- ifelse(
     fimo.motif.bar.df$element.ID %in% solo.LTR.IDs,
     &quot;Solo&quot;,
     &quot;Full&quot;
-)
-
-### combined plots
+)</code></pre>
+</div>
+<div id="ctcf-in-all-across-iaps" class="section level1">
+<h1>CTCF in all across IAPs</h1>
+<p>CTCF scores from deeptools are shown for a 1 kb-flanked window around each IAP. Deeptools log2 ratios are averaged across 50 bp tiles in the flanking regions, and across the five tiles of equal length within each element. Elements are sorted by averaged log2 score in the 50 bp flanking tile immediately upstream of the 5’ edge of each LTR. Motif presence/absence tiles show whether the element’s 5’ LTR contains the primary MEME motif.</p>
+<pre class="r"><code>### combined plots
 
 ctcf.plot.legend &lt;- merged_mapq_ge_10.hm.df[1,] %&gt;%
     polished.heatmap(X.EDGE.STR) %&gt;%
@@ -1010,7 +1131,14 @@ ggsave(&quot;output/CTCF_and_motif.all.a4.pdf&quot;, cowplot::plot_grid(combined
 ggsave(&quot;output/CTCF_and_motif.all.a4.svg&quot;, cowplot::plot_grid(combined.IAP_no_VM, combined.IAP_VM, ncol=2), width=8.3*0.95, height=11.7*0.6)
 ggsave(&quot;output/CTCF_and_motif.all.a4.ps&quot;, cowplot::plot_grid(combined.IAP_no_VM, combined.IAP_VM, ncol=2), width=8.3*0.95, height=11.7*0.6)
 
-ggsave(&quot;output/CTCF_heatmap_legend.pdf&quot;, ctcf.plot.legend, width=1, height=2)</code></pre>
+ggsave(&quot;output/CTCF_heatmap_legend.pdf&quot;, ctcf.plot.legend, width=1, height=2)
+
+print(combined.IAP_no_VM)</code></pre>
+<p><img src="figure/05.CTCF_at_IAPs.Rmd/combined.plots-1.png" width="480" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>print(combined.IAP_VM)</code></pre>
+<p><img src="figure/05.CTCF_at_IAPs.Rmd/combined.plots-2.png" width="480" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>print(ctcf.plot.legend)</code></pre>
+<p><img src="figure/05.CTCF_at_IAPs.Rmd/show.legend-1.png" width="192" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1081,6 +1209,7 @@ loaded via a namespace (and not attached):
 [65] stringi_1.4.3               Rcpp_1.0.3                 
 [67] vctrs_0.2.0                 tidyselect_0.2.5           
 [69] xfun_0.11                  </code></pre>
+</div>
 </div>
 
 
