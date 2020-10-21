@@ -1,0 +1,378 @@
+---
+title: "CTCF binding at IAPs"
+author: "Noah Kessler"
+date: "24/08/2020"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapse: false
+    code_folding: "hide"
+params:
+  ctcf_norm_dir: "/home/adh54/data/individualCTCFChIPseq/normalized"
+---
+
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(rtracklayer)
+library(ggplot2)
+library(readr)
+library(knitr)
+library(kableExtra)
+
+source("code/genomics_functions.R")
+source("code/data_functions.R")
+knitr::opts_chunk$set(message = FALSE) 
+```
+
+```{r functions}
+plot.heatmap <- function(heatmap.df, feat.width, label.col=NULL) {
+  if ("type" %in% names(heatmap.df)) {
+    heatmap.df$old.feat.idx <- heatmap.df$feat.idx
+    feat.idx.mapping <- heatmap.df[,c("type", "old.feat.idx")] %>%
+    	distinct() %>%
+    	arrange(type, old.feat.idx) %>%
+    	mutate(feat.idx=1:n())
+    heatmap.df$feat.idx <- NULL
+    heatmap.df <- left_join(heatmap.df, feat.idx.mapping, by=c("type", "old.feat.idx"))
+  }
+  
+  plt <- ggplot(heatmap.df) +
+    geom_tile(aes(x=pos, y=-feat.idx, fill=score)) +
+    xlab(NULL) +
+    ylab(NULL) + 
+    theme_bw() + 
+    theme(panel.border = element_blank(),
+          panel.grid = element_blank())
+  
+  if (is.null(label.col)) {
+    plt <- plt +
+      theme(axis.text.y = element_blank(),
+            axis.ticks.y = element_blank())
+  }
+  else
+  {
+    label.df <- distinct(heatmap.df[,c("feat.idx", label.col)]) %>% arrange(feat.idx)
+    plt <- plt + scale_y_continuous(breaks=-label.df$feat.idx, labels=label.df[,label.col], expand=expand_scale(add=c(0.2, 0.2)))
+  }
+  
+  plt
+}
+
+get.x_axis.breaks <- function() {
+  break.pts <- c(
+    -1 * FLANK / TILE.WIDTH,
+    0,
+    FEATURE.TILES,
+    FLANK / TILE.WIDTH + FEATURE.TILES
+  )
+  return(break.pts - 0.5)
+}
+
+polished.heatmap <- function(df, x.edge.str=NULL, show.legend=TRUE) {
+  if (is.null(x.edge.str)) {
+    x.edge.str <- as.character(FLANK)
+  }
+	x.expand <- c(0.01, 0)
+	
+  plt <- plot.heatmap(df, FEATURE.TILES) +
+  	scale_fill_gradient2(
+    	limits=SCORE.LIMS,
+    	low="#1012b2", mid="white", high="#b21210", 
+    	midpoint=0
+    ) +
+    scale_y_continuous(expand=c(0.02,0))
+  
+  if (!show.legend) {
+  	x.expand <- c(0.02, 0)
+  	plt <- plt + guides(fill=FALSE)
+  }
+   
+  plt <- plt + scale_x_continuous(
+    	breaks=get.x_axis.breaks(),
+      labels=c(paste0("-", x.edge.str), "5'", "3'", paste0("+", x.edge.str)),
+      expand=x.expand
+    ) +
+    facet_wrap(vars(type), ncol=1, scales="free")
+  
+  return(plt)
+}
+```
+
+```{r get.CTCF.data}
+
+# get GRanges of full IAP extents
+IAP.extent.gr <- extent.gr(
+	with(
+		read_tsv("data/repeat_annotations/mm10.IAP.mended.tsv", col_names=FALSE),
+		GRanges(X1, IRanges(X2, X3), strand=X4, element.ID=X10)
+	),
+	by="element.ID"
+)
+
+# load validated element IDs
+validation <- readRDS("data/R_objects/validation_name_ID.RDS") %>%
+	filter(val_category != "False positive")
+
+# get element IDs of solo LTRs
+solo.LTR.IDs <- readRDS("data/R_objects/mm10.IAP.meta.RDS") %>%
+	group_by(element.ID) %>%
+	filter(n()==1) %>%
+	ungroup() %>%
+	filter(meta.subelement=="1:LTR:1") %>%
+	pull(element.ID)
+
+# set parameters for plotting
+FLANK <- 1000
+TILE.WIDTH <- 50
+FEATURE.TILES <- 5
+X.EDGE.STR <- "1kb"
+
+# load CTCF data
+log2_merged_mapq_ge_10.data.gr <- with(
+  read_tsv(file.path(params$ctcf_norm_dir, "log2ratio_mapq_ge_10.bdg"), col_names = FALSE),
+  GRanges(X1, IRanges(X2, X3), score=X4)
+)
+
+# make CTCF data 1-indexed and non-overlapping
+log2_merged_mapq_ge_10.data.gr <- resize(
+	log2_merged_mapq_ge_10.data.gr, 
+	width=width(log2_merged_mapq_ge_10.data.gr)-1,
+	fix="end"
+)
+
+# generate heatmap tile data
+merged_mapq_ge_10.hm.df <- as.data.frame(
+	mcols(score.features(
+		log2_merged_mapq_ge_10.data.gr,
+		gr.inside.flank.tiles(IAP.extent.gr, 5, 1000, 50, keep.cols="element.ID"),
+		"score"
+	))
+)
+
+# get elements ordered by CTCF at 5' outside tile
+IAP_ctcf_meta <- merged_mapq_ge_10.hm.df %>%
+	as.data.frame %>%
+	filter(pos==-1) %>%
+	arrange(desc(score)) %>%
+	mutate(feat.idx=1:n()) %>%
+	dplyr::select(element.ID, feat.idx) %>%
+	left_join(validation, by="element.ID")
+
+# add column for solo vs full/fragmented
+IAP_ctcf_meta$type <- ifelse(
+	IAP_ctcf_meta$element.ID %in% solo.LTR.IDs,
+	"Solo LTR",
+	"Fully-structured or fragmented"
+)
+
+# add order column
+merged_mapq_ge_10.hm.df <- left_join(merged_mapq_ge_10.hm.df, IAP_ctcf_meta, by="element.ID")
+
+# define score limits
+SCORE.LIMS <- c(
+	min(merged_mapq_ge_10.hm.df$score, na.rm=TRUE),
+	max(merged_mapq_ge_10.hm.df$score, na.rm=TRUE)
+)
+
+# make CTCF plots
+ctcf.plt.non_vm <- merged_mapq_ge_10.hm.df %>%
+	filter(is.na(val_category)) %>% 
+	polished.heatmap(X.EDGE.STR)
+
+ctcf.plt.c_vm <- merged_mapq_ge_10.hm.df %>%
+	filter(val_category=="Constitutive") %>% 
+	polished.heatmap(X.EDGE.STR)
+
+ctcf.plt.ts_vm <- merged_mapq_ge_10.hm.df %>%
+	filter(val_category=="Tissue-specific") %>% 
+	polished.heatmap(X.EDGE.STR)
+```
+
+```{r motif}
+plot.1d.heatmap <- function(df, bin.col, BW, legend.name=NULL) {
+  if (is.null(legend.name)) {
+    legend.name <- bin.col
+  }
+  bin.col <- enquo(bin.col)
+  ggplot(df) +
+    geom_tile(aes(x=!!bin.col + BW/2, y=0.5, width=BW, height=1, fill=count)) +
+    scale_fill_gradient(name=legend.name, low="white", high="black", limits=c(0, max(df$count))) + 
+    xlab(NULL) + ylab(NULL) +
+  	scale_x_continuous(limits=c(0, 1), expand=c(0, 0)) +
+  	scale_y_continuous(expand=c(0, 0)) +
+    theme_minimal()  +
+  	theme(
+  		panel.grid = element_blank(),
+	    axis.text.x = element_text(color="black", size=14),
+	    axis.ticks.x = element_line(color="black", size=0.5),
+	    axis.ticks.y = element_blank(),
+	    axis.text.y = element_blank(),
+	    panel.border = element_rect(color="black", fill=NA, size=1),
+  		plot.margin = unit(c(1,0,1,1), units="lines"),
+	    legend.text = element_text(size=14), 
+	    legend.title = element_text(size=14, hjust = 0.5)
+  )
+}
+
+make.motif.plt <- function(df, theme_fn=theme_bw) {
+  margin.to.use <- theme_fn()$plot.margin
+  margin.to.use[2] <- unit(0, "pt")
+  margin.to.use[4] <- unit(0, "pt")
+  
+  df %>%
+  	mutate(score=has.motif, pos=1) %>%
+		plot.heatmap(df) +
+	    scale_fill_manual(values=c(`TRUE`="black", `FALSE`="#00000000"))+
+	    scale_y_continuous(expand=c(0.02,0)) +
+	    guides(fill=FALSE) + 
+	    facet_wrap(vars(type), ncol=1, scales="free_y") +
+	    theme(
+	    	axis.ticks.x = element_blank(),
+	      axis.text.x = element_blank(),
+	      plot.margin = margin.to.use
+	    )
+}
+
+combine.motif.and.ctcf.plot <- function(motif.plt, ctcf.plt) {
+	cowplot::plot_grid(
+		motif.plt,
+		ctcf.plt,
+		nrow=1,
+		rel_widths=c(0.075, 0.925),
+		align="hv",
+		axis="ltb"
+	)
+}
+
+#load CTCF motif location data
+fimo.CTCF.gr <- with(
+	read_tsv("data/ctcf/motif/fimo.multiFixed.MEME-1.tsv", col_names = FALSE),
+	GRanges(X1, IRanges(X2, X3), element.ID=X4, subelementID=X5, subelemCoord=X7, motif=toupper(X8), strand=X6, motifStart=X9, motifEnd=X10, motifID=X12)
+)
+
+fimo.motif.df <- mcols(fimo.CTCF.gr) %>%
+	as.data.frame %>%
+	filter(motifID=="MEME-1" & grepl(":LTR:", subelementID)) %>%
+	mutate(
+		is.5p.LTR=grepl(":LTR:1",subelementID),
+		subelem.width=width(GRanges(subelemCoord)),
+		motif.start.frac=motifStart / subelem.width
+	)
+
+# plot locations of motifs in 1-d heatmap
+FRAC.BINWIDTH <- 1/50
+motif.frac.counts <- fimo.motif.df %>%
+	filter(is.5p.LTR) %>%
+	mutate(frac.bin=FRAC.BINWIDTH * floor(motif.start.frac / FRAC.BINWIDTH)) %>%
+	group_by(frac.bin) %>%
+	summarize(count=n())
+
+plot.1d.heatmap(motif.frac.counts, frac.bin, FRAC.BINWIDTH, "CTCF motif\nfrequency")
+
+motif.frac.counts.all_LTR <- fimo.motif.df %>%
+	#filter(is.5p.LTR) %>%
+	mutate(frac.bin=FRAC.BINWIDTH * floor(motif.start.frac / FRAC.BINWIDTH)) %>%
+	group_by(frac.bin) %>%
+	summarize(count=n())
+
+plot.1d.heatmap(motif.frac.counts.all_LTR, frac.bin, FRAC.BINWIDTH, "CTCF motif\nfrequency")
+
+# plot vertical presence/absence plot of motif
+fimo.motif.bar.df <-  fimo.motif.df %>%
+	filter(is.5p.LTR) %>%
+	left_join(IAP_ctcf_meta, ., by="element.ID") %>%
+	mutate(has.motif=!is.na(motif.start.frac)) %>%
+	dplyr::select(element.ID, feat.idx, val_category, name, type, has.motif) %>%
+	distinct()
+
+# use shortened facet titles
+fimo.motif.bar.df$type <- ifelse(
+	fimo.motif.bar.df$element.ID %in% solo.LTR.IDs,
+	"Solo",
+	"Full"
+)
+
+### combined plots
+
+ctcf.plot.legend <- merged_mapq_ge_10.hm.df[1,] %>%
+	polished.heatmap(X.EDGE.STR) %>%
+	cowplot::get_legend() %>%
+	cowplot::ggdraw()
+
+combined.IAP_no_VM.Full <- combine.motif.and.ctcf.plot(
+	fimo.motif.bar.df %>%
+		filter(is.na(val_category) & type=="Full") %>%
+		make.motif.plt,
+	merged_mapq_ge_10.hm.df %>%
+		filter(is.na(val_category) & type=="Fully-structured or fragmented") %>% 
+		polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_no_VM.Solo <- combine.motif.and.ctcf.plot(
+	fimo.motif.bar.df %>%
+		filter(is.na(val_category) & type=="Solo") %>%
+		make.motif.plt,
+	merged_mapq_ge_10.hm.df %>%
+		filter(is.na(val_category) & type=="Solo LTR") %>% 
+		polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_c_VM.Full <- combine.motif.and.ctcf.plot(
+	fimo.motif.bar.df %>%
+		filter(val_category=="Constitutive" & type=="Full") %>%
+		make.motif.plt,
+	merged_mapq_ge_10.hm.df %>%
+		filter(val_category=="Constitutive" & type=="Fully-structured or fragmented") %>% 
+		polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_c_VM.Solo <- combine.motif.and.ctcf.plot(
+	fimo.motif.bar.df %>%
+		filter(val_category=="Constitutive" & type=="Solo") %>%
+		make.motif.plt,
+	merged_mapq_ge_10.hm.df %>%
+		filter(val_category=="Constitutive" & type=="Solo LTR") %>% 
+		polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_ts_VM.Full <- combine.motif.and.ctcf.plot(
+	fimo.motif.bar.df %>%
+		filter(val_category=="Tissue-specific" & type=="Full") %>%
+		make.motif.plt,
+	merged_mapq_ge_10.hm.df %>%
+		filter(val_category=="Tissue-specific" & type=="Fully-structured or fragmented") %>% 
+		polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_ts_VM.Solo <- combine.motif.and.ctcf.plot(
+	fimo.motif.bar.df %>%
+		filter(val_category=="Tissue-specific" & type=="Solo") %>%
+		make.motif.plt,
+	merged_mapq_ge_10.hm.df %>%
+		filter(val_category=="Tissue-specific" & type=="Solo LTR") %>% 
+		polished.heatmap(X.EDGE.STR, show.legend=FALSE)
+)
+
+combined.IAP_no_VM <- cowplot::plot_grid(combined.IAP_no_VM.Full, combined.IAP_no_VM.Solo, ncol=1)
+combined.IAP_VM <- cowplot::plot_grid(
+	combined.IAP_c_VM.Full,
+	combined.IAP_c_VM.Solo,
+	combined.IAP_ts_VM.Full,
+	combined.IAP_ts_VM.Solo,
+	ncol=1
+)
+
+ggsave("output/CTCF_and_motif.NonVM.pdf", combined.IAP_no_VM, width=5, height=8)
+
+ggsave("output/CTCF_and_motif.VM.pdf", combined.IAP_VM, width=5, height=8)
+
+ggsave("output/CTCF_and_motif.all.a4.pdf", cowplot::plot_grid(combined.IAP_no_VM, combined.IAP_VM, ncol=2), width=8.3*0.95, height=11.7*0.6)
+ggsave("output/CTCF_and_motif.all.a4.svg", cowplot::plot_grid(combined.IAP_no_VM, combined.IAP_VM, ncol=2), width=8.3*0.95, height=11.7*0.6)
+ggsave("output/CTCF_and_motif.all.a4.ps", cowplot::plot_grid(combined.IAP_no_VM, combined.IAP_VM, ncol=2), width=8.3*0.95, height=11.7*0.6)
+
+ggsave("output/CTCF_heatmap_legend.pdf", ctcf.plot.legend, width=1, height=2)
+
+```
