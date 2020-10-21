@@ -1,0 +1,260 @@
+---
+title: "Methylation outside the IAP"
+author: "Noah Kessler"
+date: "29/09/2020"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapse: false
+    code_folding: "hide"
+params:
+  methy_data_dir: "/data/blueprint/bs-seq/methy/BL6/near_IAP_10kb/"
+---
+
+```{r setup, include=FALSE}
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(GenomicRanges)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+source("code/data_functions.R")
+source("code/genomics_functions.R")
+knitr::opts_chunk$set(echo = TRUE)
+
+INSIDE.N.CPG <- 8
+ADJACENCY.DISTANCE <- 10000
+
+```
+
+```{r define.functions}
+
+CpGs.in.region <- function(CpG.gr, region.gr, N.CpG=0, from.right=FALSE) {
+  ovlps <- as.data.frame(findOverlaps(CpG.gr, region.gr))
+  ovlps$CG.pos <- start(CpG.gr[ovlps$queryHits])
+  if (from.right) {
+    ovlps <- ovlps %>% arrange(subjectHits, desc(CG.pos))
+  }
+  
+  selected.CGs <- ovlps %>%
+    group_by(subjectHits) %>%
+    mutate(CG.index=1:n())
+  if (N.CpG > 0) {
+    selected.CGs <- selected.CGs %>% top_n(-N.CpG, CG.index)
+  }
+  selected.CGs <- selected.CGs %>%
+    dplyr::select(-queryHits) %>%
+    as.data.frame()
+  
+  colnames(selected.CGs) <- c("index", "CG.pos", "CG.index")
+  selected.CGs$side <- if (from.right) "right" else "left"
+  selected.CGs
+}
+
+```
+
+```{r load.LTR.positions.and.CpGs}
+# get mm10 CpGs
+mm10.CpG.gr <- sortSeqlevels(get.mm10.CpGs())
+mm10.CpG.gr <- sort(mm10.CpG.gr) # should be sorted, but force anyway since it's needed
+
+# obtain all (terminal) IAP LTRs
+IAP.meta.gr <- readRDS("data/R_objects/mm10.IAP.meta.RDS")
+
+IAP.subelem.counts <- IAP.meta.gr %>%
+	group_by(element.ID) %>%
+	summarize(N.subelem = max(as.numeric(subelem.idx)))
+
+IAP.LTR.top_repName <- readRDS("data/R_objects/mm10.IAP.top_names.RDS") %>%
+	dplyr::select(element.ID, is.LTR, repName)
+
+IAP.meta.gr <- left_join(IAP.meta.gr, IAP.subelem.counts, by="element.ID") %>%
+	mutate(is.LTR = subelem.type=="LTR",
+				 first.subelement = subelem.idx == 1,
+				 last.subelement = subelem.idx == N.subelem) %>%
+	dplyr::select(-subelem.type, -subelem.subidx, -N.subelem) %>%
+	left_join(IAP.LTR.top_repName, by=c("element.ID", "is.LTR")) %>%
+	df.as.gr
+
+	
+# identify regions in which to find CpGs
+
+# look at 'left'-most CpGs from the 5' end of + strand LTRs
+# and from the 3' end of - strand LTRs
+IAP.LTR.look_left <- IAP.meta.gr[with(IAP.meta.gr,
+  is.LTR & ((first.subelement & strand == "+") | (last.subelement & strand == "-"))
+)]
+IAP.LTR.adjacent.look_right <- flank(IAP.LTR.look_left, ADJACENCY.DISTANCE, start=TRUE, both=FALSE, ignore.strand=TRUE)
+
+# look at 'right'-most CpGs from the 3' end of + strand LTRs
+# and from the 5' end of - strand LTRs
+IAP.LTR.look_right <- IAP.meta.gr[with(IAP.meta.gr,
+  is.LTR & ((first.subelement & strand == "-") | (last.subelement & strand == "+"))
+)]
+IAP.LTR.adjacent.look_left <- flank(IAP.LTR.look_right, ADJACENCY.DISTANCE, start=FALSE, both=FALSE, ignore.strand=TRUE)
+
+
+# pull the list of CpGs:
+# INSIDE.N.CPG within the LTR, all CpGs within the
+# ADJACENCY.DISTANCE flanks 
+
+IAP.LTR.CpGs <- rbind(
+  index.r_join(
+  	IAP.LTR.look_left,
+  	CpGs.in.region(mm10.CpG.gr, IAP.LTR.look_left, INSIDE.N.CPG, FALSE)
+  ),
+  index.r_join(
+  	IAP.LTR.look_right,
+  	CpGs.in.region(mm10.CpG.gr, IAP.LTR.look_right, INSIDE.N.CPG, TRUE)
+  )
+) %>%
+  arrange(element.ID, side, CG.index) %>%
+  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
+
+IAP.LTR.adj.CpGs <- rbind(
+  index.r_join(
+  	IAP.LTR.look_left,
+  	CpGs.in.region(mm10.CpG.gr, IAP.LTR.adjacent.look_right, 0, TRUE)
+  ),
+  index.r_join(
+  	IAP.LTR.look_right,
+  	CpGs.in.region(mm10.CpG.gr, IAP.LTR.adjacent.look_left, 0, FALSE)
+  )
+) %>%
+  arrange(element.ID, side, CG.index) %>%
+  dplyr::select(seqnames, start, end, strand, repName, element.ID, side, CG.pos, CG.index)
+
+colnames(IAP.LTR.CpGs)[1] <- "chrom"
+colnames(IAP.LTR.adj.CpGs)[1] <- "chrom"
+
+
+# define which side of the element we're on, and how far away from that edge each CpG is
+IAP.LTR.CpGs$LTR.bound.side <- factor(with(IAP.LTR.CpGs,
+  ifelse((side=="left" & strand=="-") | (side=="right" & strand=="+"), "3prime", "5prime")),
+  levels=c("5prime", "3prime")
+)
+
+IAP.LTR.CpGs$edge.dist <- with(IAP.LTR.CpGs, 
+  ifelse(side=="left", CG.pos - start, CG.pos - end) * ifelse(strand=="+", 1, -1)     
+)
+
+
+IAP.LTR.adj.CpGs$LTR.bound.side <- factor(with(IAP.LTR.adj.CpGs,
+  ifelse((side=="left" & strand=="-") | (side=="right" & strand=="+"), "5prime", "3prime")),
+  levels=c("5prime", "3prime"))
+
+IAP.LTR.adj.CpGs$edge.dist <- with(IAP.LTR.adj.CpGs, 
+  ifelse(side=="right", start - CG.pos, CG.pos - end) * ifelse(LTR.bound.side=="5prime", -1, 1)                                      
+)
+```
+
+How many CpGs tend to lie in the `r ADJACENCY.DISTANCE` bp flanking regions we have defined?
+
+```{r characterizing.adjacent.regions}
+IAP.LTR.adj.CpG.count <- IAP.LTR.adj.CpGs %>% group_by(element.ID, side) %>% summarize(N=n())
+
+hist(IAP.LTR.adj.CpG.count$N)
+
+ggplot(IAP.LTR.adj.CpGs) +
+	geom_histogram(aes(x=abs(edge.dist)), breaks=seq(0, ADJACENCY.DISTANCE, 100)) +
+	facet_wrap(. ~ LTR.bound.side) +
+	theme_minimal() 
+```
+
+```{r load.methy}
+
+get.files.and.names <- function(dir, pattern) {
+  files <- file.path(dir, list.files(dir, pattern))
+  names <- as.character(sapply(files, function(n) paste(strsplit(basename(n),"\\.")[[1]][1:2], collapse="_")))
+  list(names = names, files = files)
+}
+
+LTR.CpG.methy <- function(LTR.CG.df, files, sample.names, shift=0, just.counts=FALSE, merge=TRUE) {
+  stopifnot(length(sample.names) == length(files))
+  
+  for (f.idx in 1:length(files)) {
+    cat(sample.names[f.idx],"\n")
+     
+    sample.data <- read.table(files[f.idx], header=FALSE)
+    if (just.counts) {
+      colnames(sample.data) <- c("chrom", "CG.pos", 
+                                 paste0(sample.names[f.idx], ".umC"),   paste0(sample.names[f.idx], ".mC"))
+    } else {
+      colnames(sample.data) <- c("chrom", "CG.pos", 
+                                 paste0(sample.names[f.idx], ".umC"),   paste0(sample.names[f.idx], ".mC"),
+                                 paste0(sample.names[f.idx], ".depth"), paste0(sample.names[f.idx], ".methy"))
+    }
+    sample.data$chrom <- factor(sample.data$chrom, levels=levels(LTR.CG.df$chrom))
+    sample.data$CG.pos <- sample.data$CG.pos + shift #shift to 1-indexed pos
+    
+    LTR.CG.df <- left_join(LTR.CG.df, sample.data, by=c("chrom", "CG.pos"))
+  }
+  
+  LTR.CG.df
+}
+
+
+methy.samples.B <- get.files.and.names(params$methy_data_dir, "^B6_[FM]_B_.*\\.methy\\.combined_strand\\..*\\.tsv$")
+methy.samples.T <- get.files.and.names(params$methy_data_dir, "^B6_[FM]_T_.*\\.methy\\.combined_strand\\..*\\.tsv$")
+
+
+IAP.methy.B <- LTR.CpG.methy(IAP.LTR.CpGs,  methy.samples.B$files, methy.samples.B$names, 0, TRUE)
+IAP.methy.T <- LTR.CpG.methy(IAP.LTR.CpGs,  methy.samples.T$files, methy.samples.T$names, 0, TRUE)
+
+IAP.methy.adj.B <- LTR.CpG.methy(IAP.LTR.adj.CpGs,  methy.samples.B$files, methy.samples.B$names, 0, TRUE)
+IAP.methy.adj.T <- LTR.CpG.methy(IAP.LTR.adj.CpGs,  methy.samples.T$files, methy.samples.T$names, 0, TRUE)
+
+
+cVMIAPs <- readRDS("data/R_objects/validation_name_ID.RDS") %>%
+	dplyr::filter(val_category == "Constitutive") %>%
+	dplyr::select(-val_category)
+
+cVMIAP.methy <- lapply(
+	list(IAP.methy.B, IAP.methy.adj.B, IAP.methy.T, IAP.methy.adj.T), 
+	function(df)
+		df %>%
+			dplyr::select(-start, -end, -repName) %>%
+			left_join(cVMIAPs, by="element.ID") %>%
+			dplyr::filter(!is.na(name)) %>%
+			pivot_longer(
+				starts_with("B6_"),
+				names_to="methy.var",
+				values_to="count"
+			)
+) %>%
+	bind_rows() %>%
+	separate(methy.var, c("sample", "call"), "\\.") %>%
+	mutate(cell.type=strsplit.n(sample, "_", 3)) %>%
+	replace_na(list(count=0)) %>%
+	pivot_wider(names_from=call, values_from=count) %>%
+	mutate(
+		cvg = mC+umC,
+		methy = mC/cvg,
+		edge.dist.bin = (1+floor(edge.dist/100))
+	) %>%
+	dplyr::select(-mC, -umC)
+	
+
+methy_outside_IAP_plot <- cVMIAP.methy %>%
+	filter(
+		(LTR.bound.side=="5prime" & edge.dist < 0) | (LTR.bound.side=="3prime" & edge.dist > 0)
+	) %>% # ignore methy inside elements
+	mutate(edge.dist=edge.dist/1000) %>%
+	ggplot(aes(x=edge.dist, y=methy, color=cell.type)) +
+		geom_line(aes(group=sample), alpha=0.25) +
+		geom_vline(xintercept = 0) +
+		coord_cartesian(xlim=c(-5, 5), ylim=c(0, 1), expand = FALSE) +
+		scale_x_continuous(breaks=seq(-5, 5, 2.5)) +
+		xlab("Distance from IAP edge [kb]") +
+		ylab("Methylation") +
+		scale_color_discrete(name="Cell type") +
+		facet_wrap(vars(name), ncol=3) +
+		theme_bw() +
+		theme(panel.spacing = unit(1, "line"))
+	
+
+print(methy_outside_IAP_plot)
+
+ggsave("output/Methylation_outside_cVMIAPs.pdf", methy_outside_IAP_plot, width=15, height=40)
+
+```
